@@ -1,6 +1,7 @@
 
 from flask import Flask, render_template, request, flash, redirect, url_for
 
+from groq import Groq
 from dotenv import load_dotenv
 import os
 import google.generativeai as genai
@@ -13,19 +14,38 @@ genai.configure(api_key=os.getenv('GOOGLE_GEMINI_API'))
 #genai.configure(api_key='apikeyinseralternative')
 
 #model = genai.GenerativeModel('gemini-1.5-pro-latest')
-model = genai.GenerativeModel('gemini-1.0-pro')
+#model = genai.GenerativeModel('gemini-1.0-pro')
+model="llama-3.1-8b-Instant"
+
+client = Groq(
+    # This is the default and can be omitted
+    api_key=os.environ.get("GROQ_API_KEY"),
+)
+
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key'
 
 prompt = '(0. no javascript allowed 1. Write only in html or markdown format, using documentation from 2. pico css, .message-card is the class that can be changed, 3. jinja templates so additional pages can be created with the help of: 4. htmx in order to make local hx-swaps for dynamic effect and 5. alpinejs for boosting style and user interactivity) respond to: '
 
 
 def ai(prompt, message):
-  response = model.generate_content(message)
-  print(response.text)
-  return mdeee(response.text)
-  #return (response.text)
+  #googlegemini
+    #response = model.generate_content(message)
+ #  print(response.text)
+  #return mdeee(response.text)
+
+ #groq
+  chat_completion = client.chat.completions.create(
+    messages=[
+        {
+            "role": "user",
+            "content": message,
+        }
+    ],
+    model=model,
+  )
+  reponse = chat_completion.choices[0].message
+  return mdeee(reponse.content)
 
 
 app = Flask(__name__)
