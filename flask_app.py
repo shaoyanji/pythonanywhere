@@ -4,13 +4,13 @@ from flask import Flask, render_template, request, flash, redirect, url_for
 from groq import Groq
 from dotenv import load_dotenv
 import os
-import google.generativeai as genai
+#import google.generativeai as genai
 from markdown2 import markdown as mdeee
 from fuzzywuzzy import fuzz
 
 load_dotenv()
 # AI APIKey: Google Gemini
-genai.configure(api_key=os.getenv('GOOGLE_GEMINI_API'))
+#genai.configure(api_key=os.getenv('GOOGLE_GEMINI_API'))
 #genai.configure(api_key='apikeyinseralternative')
 
 #model = genai.GenerativeModel('gemini-1.5-pro-latest')
@@ -162,5 +162,5 @@ def page():
   return render_template('page.html', messages=messages)
 
   # Code to make replit servers work
-if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=8080)
+#if __name__ == '__main__':
+#  app.run(host='0.0.0.0', port=8080)
