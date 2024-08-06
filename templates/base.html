@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" caontent="width=device-width, initial-scale=1.0">
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+  />
+    <script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script>
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <title>{% block title %} {% endblock %} - Twitter Spaces</title>
+
+
+</head>
+<body>
+  <div id="wrapper" class="clearfix">
+    <!--start wrapper-->
+    <div id="header" class="clearfix">
+      <!--start header-->
+      <Div>
+      
+      <div class="nav">
+     </div>
+      <!--end navigation-->
+
+      <!--end header-->
+      <div class="container">
+        {% for message in get_flashed_messages() %}
+            <div class="alert">{{ message }}</div>
+        {% endfor %}
+        {% block content %} {% endblock %}
+      </div>
+    </div>
+      <div id="footer">
+      <!--start footer-->
+        <div class="footer-text">
+          <p><span>&copy; A Twitter Space Social Experiment</span> | Web App made by:  <a href="https://twitter.com/i/spaces/1yNxaZklBelKj">@jisifu</a></p>
+        </div>
+      </div>
+<!--end footer-->
+  </div>
+<!--end wrapper-->
+</body>
+</html>
+

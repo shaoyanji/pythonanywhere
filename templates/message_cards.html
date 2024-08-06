@@ -1,0 +1,17 @@
+<div class="message-container">
+    {% for message in messages[::-1] %}
+        <div class="message-card">
+          <!-- Add edit and favorite buttons here -->
+          <div class="message-buttons">
+              <button class="edit-button">Edit</button>
+              <button class="favorite-button">★</button>
+        <div class="message-header">
+          <h3>{{ message['title'] }}</h3>
+        </div>
+          <p>{{ message['content'] }}</p>
+        <div class="message-card-content"">
+          {{ message['aicontent'] | safe }}
+
+        </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Messages {% endblock %}</h1>
+    <div class="message-container">
+        {% for message in messages[::-1] %}
+            <div class="message-card">
+                <h3>{{ message['title'] }}</h3>
+                <p>{{ message['content'] }}</p>
+                {{ message['aicontent'] }}
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
