@@ -15,8 +15,9 @@ load_dotenv()
 
 #model = genai.GenerativeModel('gemini-1.5-pro-latest')
 #model = genai.GenerativeModel('gemini-1.0-pro')
-model="llama-3.1-8b-Instant"
 
+model="llama-3.1-8b-Instant"
+#model="llama-3.1-70b-versatile"
 client = Groq(
     # This is the default and can be omitted
     api_key=os.environ.get("GROQ_API_KEY"),
@@ -162,5 +163,5 @@ def page():
   return render_template('page.html', messages=messages)
 
   # Code to make replit servers work
-#if __name__ == '__main__':
-#  app.run(host='0.0.0.0', port=8080)
+if __name__ == '__main__':
+  app.run(host='0.0.0.0', port=8080)
