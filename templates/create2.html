@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block content %}
-        <h1>{% block title %}Demo{% endblock %}</h1>
+        <h1>{% block title %}HTMX-Python-Flask-AlpineJS AI Stack{% endblock %}</h1>
     <ul> 
       <div class="form-group">
           <textarea class="form-control" type="text" id="content"
-              name="content" placeholder="Begin Typing To Chat..." rows="5"
+              name="content" rows="3"
               hx-post="/submit_message"
               hx-trigger="input changed delay:500ms, content" 
               hx-target=".message-container"
@@ -16,12 +16,16 @@
       </div>
     </ul>
     <ul>
-        <input class="form-control" type="search" 
-           name="search" placeholder="Begin Typing To Search" 
-           hx-post="/search" 
-           hx-trigger="input changed delay:500ms, search" 
-           hx-target=".message-container"
-           hx-indicator=".htmx-indicator">
+        <div class="w-full max-w-xs mx-auto">
+            <input name="search" type="text" placeholder="Begin Typing to Search"
+                class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+                 hx-post="/search" 
+                 hx-trigger="input changed delay:500ms, search" 
+                 hx-target=".message-container"
+                 hx-indicator=".htmx-indicator"
+                />
+        </div>
+          
     </ul>
     <ul>
       

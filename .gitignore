@@ -30,7 +30,11 @@ package-lock.json
 apps/static/assets/node_modules
 apps/static/assets/yarn.lock
 apps/static/assets/.temp
+node_modules
 
+tailwind.config.js
+package.json
+static/input.css
 
 migrations
 
