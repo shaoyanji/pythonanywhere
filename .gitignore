@@ -32,6 +32,7 @@ apps/static/assets/yarn.lock
 apps/static/assets/.temp
 node_modules
 
+postcss.config.cjs
 tailwind.config.js
 package.json
 static/input.css

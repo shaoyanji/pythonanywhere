@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" caontent="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="../static/output.css" rel="stylesheet">
     <script src="https://unpkg.com/htmx.org@2.0.1" integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/" crossorigin="anonymous"></script>
     <script src="//unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.6/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.21.6/dist/js/uikit-icons.min.js"></script>
     <title>{% block title %} {% endblock %} - Flask Python - TailwindCSS - AlpineJs - HTMX - Groq App</title>
 
 
@@ -13,7 +15,39 @@
 <body>
   <div id="wrapper" class="clearfix">
     <!--start wrapper-->
-      <nav class="flex justify-between px-3.5 py-1 border border-neutral-200/60 rounded-md">
+         <div id="header" class="clearfix">
+      <!--start header-->
+      <Div>
+     <!--start navigation-->
+
+      <div class="nav">
+        <section class="w-full px-8 text-gray-700 bg-white" {!! $attributes ?? '' !!}>
+    <div class="container flex flex-col flex-wrap items-center justify-between py-5 mx-auto md:flex-row max-w-7xl">
+        <div class="relative flex flex-col md:flex-row">
+            <a href="#_" class="flex items-center mb-5 font-medium text-gray-900 lg:w-auto lg:items-center lg:justify-center md:mb-0">
+                <span class="mx-auto text-xl font-black leading-none text-gray-900 select-none">tails<span class="text-indigo-600" data-primary="indigo-600">.</span></span>
+            </a>
+            <nav class="flex flex-wrap items-center mb-5 text-base md:mb-0 md:pl-8 md:ml-8 md:border-l md:border-gray-200">
+                <a href="#_" class="mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900">Home</a>
+                <a href="#_" class="mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900">Features</a>
+                <a href="#_" class="mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900">Pricing</a>
+                <a href="#_" class="mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900">Blog</a>
+            </nav>
+        </div>
+
+        <div class="inline-flex items-center ml-5 space-x-6 lg:justify-end">
+            <a href="#" class="text-base font-medium leading-6 text-gray-600 whitespace-no-wrap transition duration-150 ease-in-out hover:text-gray-900">
+                Sign in
+            </a>
+            <a href="#" class="inline-flex items-center justify-center px-4 py-2 text-base font-medium leading-6 text-white whitespace-no-wrap bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-600" data-rounded="rounded-md" data-primary="indigo-600">
+                Sign up
+            </a>
+        </div>
+    </div>
+</section>
+      </div>
+      <!--end navigation-->
+ <nav class="flex justify-between px-3.5 py-1 border border-neutral-200/60 rounded-md">
     <ol class="inline-flex items-center mb-3 space-x-1 text-xs text-neutral-500 [&_.active-breadcrumb]:text-neutral-600 [&_.active-breadcrumb]:font-medium sm:mb-0">
         <li class="flex items-center h-full"><a href="#_" class="py-1 hover:text-neutral-900"><svg class="w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" ><path d="M2.25 2.25a.75.75 0 000 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 00-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 000-1.5H5.378A2.25 2.25 0 017.5 15h11.218a.75.75 0 00.674-.421 60.358 60.358 0 002.96-7.228.75.75 0 00-.525-.965A60.864 60.864 0 005.68 4.509l-.232-.867A1.875 1.875 0 003.636 2.25H2.25zM3.75 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zM16.5 20.25a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" /></svg></a></li>  
         <svg class="w-5 h-5 text-gray-400/70" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="none" stroke="none"><path d="M10 8.013l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></g></svg>
@@ -24,15 +58,6 @@
         <li><a class="inline-flex items-center py-1 font-normal rounded cursor-default active-breadcrumb focus:outline-none">Delivery Address</a></li>
     </ol>
 </nav>
-    <div id="header" class="clearfix">
-      <!--start header-->
-      <Div>
-     <!--start navigation-->
-
-      <div class="nav">
-
-      </div>
-      <!--end navigation-->
 
       <!--end header-->
       <div class="container">

@@ -54,38 +54,18 @@ app = Flask(__name__)
 messages = [{
     'title': 'Message One',
     'content': 'Message One Content',
-    'aicontent': 'AI Generated Content'
+    'aicontent': 'AI Generated Content',
+    'summary': 'AI Generated Summary'
 }, {
     'title': 'Message Two',
     'content': 'Message Two Content',
-    'aicontent': 'Message Three Content'
+    'aicontent': 'Message Three Content',
+    'summary': 'AI Generated Summary'
 }]
 
 @app.route('/')
 def index():
  return render_template('create2.html', messages=messages)
-
-@app.route('/create/', methods=['GET', 'POST'])
-def create():
-  if request.method == 'POST':
-    title = request.form['title']
-    content = request.form['content']
-    aicontent = ai('', content)
-    if not title:
-      flash('Title is required!')
-    elif not content:
-      flash('Content is required!')
-    else:
-      messages.append({
-          'title': title,
-          'content': content,
-          'aicontent': aicontent
-      })
-      # Redirect to the same page after successful submission
-      return redirect(url_for('create'))
-
-  return render_template('create.html', messages=messages)
-
 
 @app.route('/create2/', methods=['GET', 'POST'])
 def create2():
@@ -101,7 +81,8 @@ def create2():
       messages.append({
           'title': title,
           'content': content,
-          'aicontent': aicontent
+          'aicontent': aicontent,
+          'summary': summary
       })
       # Redirect to the same page after successful submission
       return redirect(url_for('create2'))
@@ -123,11 +104,12 @@ def submit_message():
   else:
     # Add message to the list
     aicontent = ai(prompt, content)
-
+    summary = ai('','provide only a short title for the following interaction with u123 and i123, do not write anything else: u123 says'+ content + 'i123 responds '+ aicontent)
     messages.append({
         'title': title,
         'content': content,
-        'aicontent': aicontent
+        'aicontent': aicontent,
+        'summary': summary
     })
 
   # Render the updated message container HTML
@@ -141,16 +123,18 @@ def search():
   for message in reversed(messages):  # Iterate in reverse order
     if fuzz.partial_ratio(search_term.lower(), message['title'].lower()) >= 90 or \
   fuzz.partial_ratio(search_term.lower(), message['content'].lower()) >= 90 or \
-  fuzz.partial_ratio(search_term.lower(), message['aicontent'].lower()) >= 50:
+  fuzz.partial_ratio(search_term.lower(), message['summary'].lower()) >= 90 or \
+ fuzz.partial_ratio(search_term.lower(), message['aicontent'].lower()) >= 50:
       results_html += f"""
-            <div class="message-card">
+            <div 
+class="max-w-sm bg-white border rounded-lg shadow-sm p-7 border-neutral-200/60" >
                 <!-- Add edit and favorite buttons here -->
                 <div class="message-buttons">
                     <button class="edit-button">Edit</button>
                     <button class="favorite-button">★</button>
                 </div>
                 <div class="message-header">
-                    <h3>{message['title']}</h3>
+                    <h3> {message['title']}  {message['summary']}</h3>
                 </div>
                 {message['aicontent']}
             </div>

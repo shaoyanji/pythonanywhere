@@ -1,18 +1,31 @@
 {% extends 'base.html' %}
 
 {% block content %}
-        <h1>{% block title %}HTMX-Python-Flask-AlpineJS AI Stack{% endblock %}</h1>
-    <ul> 
-      <div class="form-group">
-          <textarea class="form-control" type="text" id="content"
+        <h1>{% block title %} {% endblock %}</h1>
+    <ul>
+       <div class="w-full max-w-xs mx-auto">
+        <textarea type="text" placeholder="Type your message here." 
+              class="flex w-full h-auto min-h-[80px] px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
               name="content" rows="3"
               hx-post="/submit_message"
               hx-trigger="input changed delay:500ms, content" 
               hx-target=".message-container"
               hx-swap="afterbegin"
               hx-boost-immediate="true"
-              hx-indicator=".htmx-indicator">  
-          </textarea>
+              hx-indicator=".htmx-indicator"
+            x-data="{ 
+                resize () { 
+                    $el.style.height = '0px'; 
+                    $el.style.height = $el.scrollHeight + 'px' 
+                } 
+            }"
+            x-init="resize()"
+            @input="resize()"
+            type="text" 
+            placeholder="Type your message here. I will resize based on the height content." 
+            class="flex w-full h-auto min-h-[80px] px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-400 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
+        >         
+        </textarea>
       </div>
     </ul>
     <ul>
@@ -25,8 +38,8 @@
                  hx-indicator=".htmx-indicator"
                 />
         </div>
-          
     </ul>
+
     <ul>
       
       <span class="htmx-indicator"> 
@@ -34,11 +47,26 @@
       </span>
         <ul class="message-container" hx-sortable >
             {% for message in messages[::-1] %}
-                <li class="message-card" hx-drag="item">
-                    <h3>{{ message['title'] }}</h3>
-                    <p>{{ message['content'] }}</p>
-                    {{ message['aicontent'] | safe }}
-                </li>
+
+<div x-data="{ 
+        activeAccordion: '', 
+        setActiveAccordion(id) { 
+            this.activeAccordion = (this.activeAccordion == id) ? '' : id 
+        } 
+    }" class="relative w-full max-w-md mx-auto text-sm font-normal">
+    <div x-data="{ id: $id('accordion') }" :class="{ 'text-neutral-900': activeAccordion==id, 'text-neutral-600 hover:text-neutral-900': activeAccordion!=id }" class="cursor-pointer group">
+        <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 pb-1 text-left select-none">
+            <span>{{ message['title'] }} {{ message['summary'] | safe }}</span>
+            <svg class="w-5 h-5 duration-300 ease-out" :class="{ '-rotate-[45deg]': activeAccordion==id }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
+        </button>
+        <div x-show="activeAccordion==id" x-collapse x-cloak>
+            <div class="p-4 pt-2 opacity-70">
+                {{ message['aicontent'] | safe }}
+            </div>
+        </div>
+    </div>
+</div>
+
             {% endfor %}
         </ul >
     </ul>
