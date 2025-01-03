@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ text.title }}</h1>
+<p>Type: {{ text.type }}</p>
+<p>Issued: {{ text.issued }}</p>
+<p>Language: {{ text.language }}</p>
+<p>Authors: {{ text.authors }}</p>
+<p>Subjects: {{ text.subjects }}</p>
+<p>LoCC: {{ text.locc }}</p>
+<p>Bookshelves: {{ text.bookshelves }}</p>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Texts{% endblock %}
+
+{% block content %}
+<h1>Texts</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Type</th>
+            <th>Issued</th>
+            <th>Language</th>
+            <th>Authors</th>
+            <th>Subjects</th>
+            <th>LoCC</th>
+            <th>Bookshelves</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for text in texts %}
+        <tr>
+            <td><a href="{{ url_for('text', id=text.id) }}">{{ text.id }}</a></td>
+            <td><a href="{{ url_for('text', id=text.id) }}">{{ text.title }}</a></td>
+            <td>{{ text.type }}</td>
+            <td>{{ text.issued }}</td>
+            <td>{{ text.language }}</td>
+            <td>{{ text.authors }}</td>
+            <td>{{ text.subjects }}</td>
+            <td>{{ text.locc }}</td>
+            <td>{{ text.bookshelves }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
