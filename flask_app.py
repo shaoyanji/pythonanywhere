@@ -1,55 +1,21 @@
 from flask import Flask, render_template, request, flash, redirect, url_for
 
-# from groq import Groq
 from dotenv import load_dotenv
-
-# import os
-# import google.generativeai as genai
 from markdown2 import markdown as mdeee
 from fuzzywuzzy import fuzz
+import subprocess
 
 load_dotenv()
-# AI APIKey: Google Gemini
-# genai.configure(api_key=os.getenv('GOOGLE_GEMINI_API'))
-# genai.configure(api_key='apikeyinseralternative')
-
-# model = genai.GenerativeModel('gemini-1.5-pro-latest')
-# model = genai.GenerativeModel('gemini-1.0-pro')
-
-# model="llama-3.1-8b-Instant"
-# model="llama-3.1-70b-versatile"
-# client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
-
 
 app = Flask(__name__)
 
-# prompt = '(0. no javascript allowed 1. Write only in html or markdown format, using documentation from 2. pico css, .message-card is the class that can be changed, 3. jinja templates so additional pages can be created with the help of: 4. htmx in order to make local hx-swaps for dynamic effect and 5. alpinejs for boosting style and user interactivity) respond to: '
-prompt = "null"
-
+prompt = "You are a helpful assistant"
 
 def ai(prompt, message):
-    #  googlegemini
-    # response = model.generate_content(message)
-    # print(response.text)
-    # return mdeee(response.text)
-    return mdeee(message)
+    command = ['tgpt', '--provider', 'duckduckgo', '-q', '-c', '-w', message]
+    result = subprocess.run(command,check=True,text=True,capture_output=True)
+    return mdeee(result.stdout)
 
-
-# groq
-#  chat_completion = client.chat.completions.create(
-# messages=[
-#        {
-#            "role": "user",
-#            "content": message,
-#        }
-#    ],
-#    model=model,
-#  )
-#  reponse = chat_completion.choices[0].message
-# return mdeee(reponse.content)
-
-
-app = Flask(__name__)
 
 messages = [
     {
@@ -140,15 +106,15 @@ def search():
     results_html = ""
     for message in reversed(messages):  # Iterate in reverse order
         if (
-            fuzz.partial_ratio(search_term.lower(), message["title"].lower()) >= 90
+            fuzz.partial_ratio(search_term.lower(),
+                               message["title"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["content"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["summary"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["aicontent"].lower())
             >= 50
         ):
             results_html += f"""
-            <div 
-class="max-w-sm bg-white border rounded-lg shadow-sm p-7 border-neutral-200/60" >
+            <div class="max-w-sm bg-white border rounded-lg shadow-sm p-7 border-neutral-200/60" >
                 <!-- Add edit and favorite buttons here -->
                 <div class="message-buttons">
                     <button class="edit-button">Edit</button>
@@ -166,8 +132,6 @@ class="max-w-sm bg-white border rounded-lg shadow-sm p-7 border-neutral-200/60" 
 @app.route("/page")
 def page():
     return render_template("page.html", messages=messages)
-
-    # Code to make replit servers work
 
 
 # if __name__ == '__main__':
