@@ -8,6 +8,8 @@
 {
   nativeBuildInputs = with pkgs; [
   ];
+  buildInputs = with pkgs; [
+  ];
   packages = with pkgs; [
     (python310.withPackages (ps: with ps; [
       flask
@@ -15,8 +17,11 @@
       markdown2
       #python-dotenv
     ]))
+    yq-go
+    go-task
+    fzf
   ];
    shellHook = /*bash*/ ''
-
+    task
    '';
 }
