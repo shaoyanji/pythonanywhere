@@ -11,22 +11,25 @@ pkgs.mkShell
   buildInputs = with pkgs; [
   ];
   packages = with pkgs; [
-    (python310.withPackages (ps:
-      with ps; [
-        flask
-        fuzzywuzzy
-        markdown2
-        #python-dotenv
-      ]))
-    yq-go
-    go-task
-    fzf
+    #(python310.withPackages (ps:
+    #  with ps; [
+    #    flask
+    #    fuzzywuzzy
+    #    markdown2
+    #python-dotenv
+    #  ]))
+    #yq-go
+    #go-task
+    #fzf
   ];
   shellHook =
     /*
     bash
     */
     ''
-      task
+      pip install uv
+      source .venv/bin/activate
+      uv pip install -r requirements
+      doit
     '';
 }

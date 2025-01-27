@@ -2,3 +2,4 @@ python-Levenshtein
 flask
 fuzzywuzzy
 markdown2
+doit
