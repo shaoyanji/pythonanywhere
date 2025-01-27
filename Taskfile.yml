@@ -19,6 +19,9 @@ tasks:
       - echo '@import "tailwindcss";' > ./static/input.css
       - npx @tailwindcss/cli -i ./static/input.css -o ./static/output.css --watch
     silent: true
+  install-python-deps:
+    cmds:
+      - pip install -r requirements.txt
   exit:
     cmds:
       - exit
