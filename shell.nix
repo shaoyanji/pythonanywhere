@@ -29,7 +29,7 @@ pkgs.mkShell
     ''
       pip install uv
       source .venv/bin/activate
-      uv pip install -r requirements
+      uv pip install -r requirements.txt
       doit
     '';
 }
