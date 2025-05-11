@@ -1,19 +1,21 @@
 from flask import Flask, render_template, request, flash, redirect, url_for
 
-#from dotenv import load_dotenv
+# from dotenv import load_dotenv
 from markdown2 import markdown as mdeee
 from fuzzywuzzy import fuzz
 import subprocess
 
-#load_dotenv()
+# load_dotenv()
 
 app = Flask(__name__)
 
 prompt = "You are a helpful assistant"
 
+
 def ai(prompt, message):
-    command = ['tgpt', '--provider', 'duckduckgo', '-q', '-c', '-w', message]
-    result = subprocess.run(command,check=True,text=True,capture_output=True)
+    command = ['tgpt', '--img', '-q', message]
+    result = subprocess.run(command, check=True,
+                            text=True, capture_output=True)
     return mdeee(result.stdout)
 
 

@@ -1,8 +1,8 @@
 from doit.action import CmdAction
 
 
-def task_hello():
-    """hello cmd """
+def task_webappreload():
+    """pythonanywhere reload cmd """
 
     def create_cmd_string():
         return "pa webapp reload"
@@ -13,8 +13,8 @@ def task_hello():
     }
 
 
-def task_hello2():
-    """hello"""
+def task_hello():
+    """it writes hello in a hello.txt in the git repo"""
 
     def python_hello(targets):
         with open(targets[0], "a") as output:
@@ -23,4 +23,15 @@ def task_hello2():
     return {
         'actions': [python_hello],
         'targets': ["hello.txt"],
+    }
+
+
+def task_gitbackup():
+    """backs everything up one github"""
+
+    def create_cmd_string():
+        return "git add . &&git commit -m doitupdate && git push -u"
+    return {
+        'actions': [CmdAction(create_cmd_string)],
+        'verbosity': 2,
     }
