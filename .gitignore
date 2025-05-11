@@ -17,6 +17,7 @@ venv
 .env
 # other
 .DS_Store
+key.txt
 
 # sphinx docs 
 _build

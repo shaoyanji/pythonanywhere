@@ -13,9 +13,20 @@ prompt = "You are a helpful assistant"
 
 
 def ai(prompt, message):
-    command = ['tgpt', '--img', '-q', message]
-    result = subprocess.run(command, check=True,
-                            text=True, capture_output=True)
+    command = [
+        "tgpt",
+        "--provider",
+        "groq",
+        "--key",
+        '"$(age --decrypt -i key.txt .env.age)"',
+        "--model",
+        '"llama3-70b-8192"',
+        "-w",
+        "-q",
+        message,
+    ]
+    # command = ['tgpt', '--img', '-q', message]
+    result = subprocess.run(command, check=True, text=True, capture_output=True)
     return mdeee(result.stdout)
 
 
@@ -108,8 +119,7 @@ def search():
     results_html = ""
     for message in reversed(messages):  # Iterate in reverse order
         if (
-            fuzz.partial_ratio(search_term.lower(),
-                               message["title"].lower()) >= 90
+            fuzz.partial_ratio(search_term.lower(), message["title"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["content"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["summary"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["aicontent"].lower())
