@@ -13,6 +13,9 @@ tasks:
   webappreload:
     cmds:
       - pa webapp reload
+  llm:
+    cmds:
+      - tgpt -i --provider groq --key $(age -d -i key.txt .env.age) --model llama3-70b-8192
 
   gitbackup:
     cmds:
