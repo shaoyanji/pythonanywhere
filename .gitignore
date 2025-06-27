@@ -35,6 +35,8 @@ node_modules
 
 postcss.config.cjs
 tailwind.config.js
+
+old/*
 package.json
 static/input.css
 
