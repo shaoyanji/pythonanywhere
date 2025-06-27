@@ -18,7 +18,7 @@ tasks:
     cmds:
       - git add . 
       - git commit -m "task update"
-      - git push -u"
+      - git push 
   install-tailwind:
     cmds:
       - npm install tailwindcss @tailwindcss/cli
