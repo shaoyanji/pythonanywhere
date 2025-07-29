@@ -4,10 +4,19 @@ from dotenv import load_dotenv
 from markdown2 import markdown as mdeee
 from fuzzywuzzy import fuzz
 import subprocess
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 
 load_dotenv()
 api_key = os.getenv('GROQ_API_KEY')
+password = os.getenv('MYSQL_PASSWORD')
+user = os.getenv('MYSQL_USER')
 app = Flask(__name__)
+
+# MySQL database
+app.config['SQLALCHEMY_DATABASE_URI']= 'mysql+pymysql://'+user+':'+password+'@'+user+'.mysql.pythonanywhere-services.com/'+user+'$default'
+app.config['SECRET_KEY'] = "secrettt"
+db = SQLAlchemy(app)
 
 prompt = "You are a helpful assistant"
 
