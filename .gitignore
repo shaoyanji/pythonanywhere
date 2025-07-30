@@ -42,3 +42,5 @@ static/input.css
 
 migrations
 
+static/*.png
+static/*.webmanifest

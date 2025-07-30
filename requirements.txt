@@ -2,5 +2,5 @@ python-Levenshtein
 flask
 fuzzywuzzy
 markdown2
-doit
-jsonify
+python-dotenv
+requests

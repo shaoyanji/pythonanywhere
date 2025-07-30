@@ -4,15 +4,11 @@
 <h1>{% block title %} {% endblock %}</h1>
     <ul>
         <div class="w-full max-w-xs mx-auto">
+        <form id="form"
+              >
         <textarea type="text" placeholder="Type your message here." 
               class="empty"
-              name="content" rows="3" cols="50"
-              hx-post="/submit_message"
-              hx-trigger="input changed delay:500ms, content" 
-              hx-target=".message-container"
-              hx-swap="afterbegin"
-              hx-boost-immediate="true"
-              hx-indicator=".htmx-indicator"
+              name="content" rows="3" cols ="50"
             x-data="{ 
                 resize () { 
                     $el.style.height = '0px'; 
@@ -24,6 +20,15 @@
             type="text" 
         >         
         </textarea>
+        <button
+              hx-post="/shell_submit"
+
+hx-trigger="click"
+              hx-target=".message-container"
+              hx-swap="afterbegin"
+              hx-boost-immediate="true"
+              hx-indicator=".htmx-indicator"         id="submit-button">Submit Shell Command</button>
+        </form>
       </div>
     </ul>
     <ul>
