@@ -1,13 +1,19 @@
 import mysql.connector
+import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+password = os.getenv("MYSQL_PASSWORD")
+user = os.getenv("MYSQL_USER")
 mydb = mysql.connector.connect(
-    host="jisifu.mysql.pythonanywhere-services.com",
-    user="jisifu",
-    passwd="j]Q)Kwb9#8&R:&b",
+    host=f"{user}.mysql.pythonanywhere-services.com",
+    user=f"{user}",
+    passwd=f"{password}",
 )
 
 my_cursor = mydb.cursor()
-#my_cursor.execute("CREATE DATABASE "+mydb.user+"$users")
+# my_cursor.execute("CREATE DATABASE "+mydb.user+"$users")
 my_cursor.execute("SHOW DATABASES")
 for db in my_cursor:
     print(db)

@@ -4,3 +4,5 @@ fuzzywuzzy
 markdown2
 python-dotenv
 requests
+pymysql
+mysql-connector
