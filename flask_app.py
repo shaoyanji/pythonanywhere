@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import os
 from dotenv import load_dotenv
 from markdown2 import markdown as mdeee
@@ -6,25 +6,113 @@ from fuzzywuzzy import fuzz
 import subprocess
 import requests
 import json
-# from flask_sqlalchemy import SQLAlchemy
+#import mysql.connector
+#from flask_sqlalchemy import SQLAlchemy
 # from datetime import datetime
+from flask_mysqldb import MySQL
+
 
 load_dotenv()
 groq_api_key = os.getenv("GROQ_API_KEY")
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 cohere_api_key = os.getenv("COHERE_API_KEY")
-# password = os.getenv('MYSQL_PASSWORD')
-# user = os.getenv('MYSQL_USER')
+password = os.getenv('MYSQL_PASSWORD')
+user = os.getenv('MYSQL_USER')
 app = Flask(__name__)
 
-# MySQL database
-# app.config['SQLALCHEMY_DATABASE_URI']= 'mysql+pymysql://'+user+':'+password+'@'+user+'.mysql.pythonanywhere-services.com/'+user+'$default'
-# app.config['SECRET_KEY'] = "secrettt"
-# db = SQLAlchemy(app)
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:password@localhost/db_name'
+#app.config['SQLALCHEMY_DATABASE_URI']= 'mysql+pymysql://'+user+':'+password+'@'+user+'.mysql.pythonanywhere-services.com/'+user+'$default'
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+app.config['MYSQL_USER'] = os.getenv('MYSQL_USER') 
+app.config['MYSQL_PASSWORD'] = os.getenv('MYSQL_PASSWORD')
+app.config['MYSQL_DB'] =app.config['MYSQL_USER']+"$default"
+app.config['MYSQL_HOST'] = app.config['MYSQL_USER']+".mysql.pythonanywhere-services.com"
+mysql = MySQL(app)
+    
+def get_allmessages():
+    cur = mysql.connection.cursor()
+    try:
+        query = "SELECT * FROM messages"
+        cur.execute(query)
+        messages = cur.fetchall()
+        return jsonify(messages)
+    finally:
+        cur.close()
+
+@app.route('/api/messages', methods=['GET'])
+def get_messages():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM messages")
+    result = cur.fetchall()
+    return jsonify(result)
+
+@app.route('/api/messages', methods=['POST'])
+def create_message():
+    
+    data = request.json
+    query = ("INSERT INTO messages "
+             "(title, content, aicontent, summary) "
+             "VALUES (%(title)s, %(content)s, %(aicontent)s, %(summary)s)")
+    cursor = mysql.connection.cursor()
+    cursor.execute(query, data)
+    mysql.connection.commit()
+    
+    return jsonify({'id': cursor.lastrowid}), 201
+
+@app.route('/api/messages/<int:id>', methods=['GET'])
+def get_message(id):
+    
+    query = "SELECT * FROM messages WHERE id = %s"
+    cursor = mysql.connection.cursor()
+    cursor.execute(query, (id,))
+    message = cursor.fetchone()
+    
+    if not message:
+        return jsonify({"error": "Message not found"}), 404
+    
+    return jsonify(message)
+
+@app.route('/api/messages/<int:id>', methods=['PUT'])
+def update_message(id):
+    
+    query = ("UPDATE messages SET "
+             "title = %s, content = %s, aicontent = %s, summary = %s "
+             "WHERE id = %s")
+    data = request.json
+    
+    cursor = mysql.connection.cursor()
+    cursor.execute(query, (
+        data.get('title') or None,
+        data.get('content') or None,
+        data.get('aicontent') or None,
+        data.get('summary') or None,
+        id
+    ))
+    
+    if cursor.rowcount == 0:
+        return jsonify({"error": "Message not found"}), 404
+    
+    mysql.connection.commit()
+    
+    return jsonify({'id': id}), 200
+
+@app.route('/api/messages/<int:id>', methods=['DELETE'])
+def delete_message(id):
+    
+    query = "DELETE FROM messages WHERE id = %s"
+    cursor = mysql.connection.cursor()
+    cursor.execute(query, (id,))
+    
+    if cursor.rowcount == 0:
+        return jsonify({"error": "Message not found"}), 404
+    
+    mysql.connection.commit()
+    
+    return '', 204
 
 prompt = "You are a helpful assistant"
-
-
+messages=[{}]
 def ai(prompt, message):
     return gemini_handler(prompt + message)
 
@@ -135,21 +223,6 @@ def gptimage_handler(message):
     return mdeee(result.stdout)
 
 
-messages = [
-    {
-        "title": "Message One",
-        "content": "Message One Content",
-        "aicontent": "AI Generated Content",
-        "summary": "AI Generated Summary",
-    },
-    {
-        "title": "Message Two",
-        "content": "Message Two Content",
-        "aicontent": "Message Three Content",
-        "summary": "AI Generated Summary",
-    },
-]
-
 
 # @app.route("/", methods=["GET", "POST"])
 # def hello_world():
@@ -231,8 +304,6 @@ def blog():
 #             return redirect(url_for("create2"))
 
 #     return render_template("create2.html", messages=messages)
-
-
 @app.route("/shell_submit", methods=["POST"])
 def shell_submit():
     # Process form data
@@ -256,15 +327,22 @@ def shell_submit():
             + "i123 responds "
             + aicontent,
         )
-        messages.append(
-            {
-                "title": title,
-                "content": content,
-                "aicontent": aicontent,
-                "summary": summary,
-            }
-        )
-
+        data = {
+            'title': title,
+            'content': request.form['content'],
+            'aicontent': aicontent,
+            'summary': summary
+        }
+        messages.append(data)
+    
+    # Pass only the relevant data to create_message
+        query = ("INSERT INTO messages "
+             "(title, content, aicontent, summary) "
+             "VALUES (%(title)s, %(content)s, %(aicontent)s, %(summary)s)")
+        cursor = mysql.connection.cursor()
+        cursor.execute(query, data)
+        mysql.connection.commit()
+    
     # Render the updated message container HTML
     return render_template("message_card.html", message=messages[-1])
 
@@ -307,6 +385,7 @@ def submit_message():
 
 @app.route("/search", methods=["POST"])
 def search():
+
     search_term = request.form["search"]
     results_html = ""
     for message in reversed(messages):  # Iterate in reverse order
@@ -334,5 +413,5 @@ def search():
 
 
 # Local Development
-if __name__ == "__main__":
-    app.run(host="127.0.0.1", port=6969)
+#if __name__ == "__main__":
+#    app.run(host="127.0.0.1", port=6969)
