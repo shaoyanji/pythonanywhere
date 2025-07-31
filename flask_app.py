@@ -11,8 +11,17 @@ import json
 # from datetime import datetime
 from flask_mysqldb import MySQL
 
-
+def shellcmd(message):
+    command = f"{message.strip()}".split()
+    try:
+        result = subprocess.run(command, check=True, text=True, capture_output=True)
+        output = result.stdout if result.returncode == 0 else result.stderr
+    except Exception as e:
+        output = str(e)
+    return output
+shellcmd("echo y |age -d -i ~/.ssh/id_ed25519 .env.age >.env")
 load_dotenv()
+shellcmd("rm .env")
 groq_api_key = os.getenv("GROQ_API_KEY")
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 cohere_api_key = os.getenv("COHERE_API_KEY")
@@ -111,20 +120,12 @@ def delete_message(id):
     
     return '', 204
 
-prompt = "You are a helpful assistant"
+prompt = "You are a helpful assistant and your output is only in markdown and html"
 messages=[{}]
 def ai(prompt, message):
     return gemini_handler(prompt + message)
 
 
-def shellcmd(message):
-    command = f"{message.strip()}".split()
-    try:
-        result = subprocess.run(command, check=True, text=True, capture_output=True)
-        output = result.stdout if result.returncode == 0 else result.stderr
-    except Exception as e:
-        output = str(e)
-    return mdeee(output)
 
 
 def groq_handler(message):
@@ -303,20 +304,29 @@ def blog():
 #             # Redirect to the same page after successful submission
 #             return redirect(url_for("create2"))
 
+def create_message_from_html(data):
+    # Pass only the relevant data to create_message
+        query = ("INSERT INTO messages "
+             "(title, content, aicontent, summary) "
+             "VALUES (%(title)s, %(content)s, %(aicontent)s, %(summary)s)")
+        cursor = mysql.connection.cursor()
+        cursor.execute(query, data)
+        mysql.connection.commit()
+    
 #     return render_template("create2.html", messages=messages)
 @app.route("/shell_submit", methods=["POST"])
 def shell_submit():
     # Process form data
     # title = request.form['title']
     content = request.form["content"]
-    title = str(len(messages))
+    title = content 
     # Validate form data
     if not content:
         aicontent = ai(
             "(provide an alternative to this approach): ",
             messages[int(title) - 1]["content"],
         )
-
+# need to add a bit to amend with an alternative using a SQL find ID and PUT
     else:
         # Add message to the list
         aicontent = shellcmd(content)
@@ -334,15 +344,8 @@ def shell_submit():
             'summary': summary
         }
         messages.append(data)
-    
-    # Pass only the relevant data to create_message
-        query = ("INSERT INTO messages "
-             "(title, content, aicontent, summary) "
-             "VALUES (%(title)s, %(content)s, %(aicontent)s, %(summary)s)")
-        cursor = mysql.connection.cursor()
-        cursor.execute(query, data)
-        mysql.connection.commit()
-    
+        create_message_from_html(data)
+   
     # Render the updated message container HTML
     return render_template("message_card.html", message=messages[-1])
 
@@ -370,14 +373,16 @@ def submit_message():
             + "i123 responds "
             + aicontent,
         )
-        messages.append(
-            {
+        data = {
                 "title": title,
                 "content": content,
                 "aicontent": aicontent,
                 "summary": summary,
             }
+        messages.append(
+           data 
         )
+        create_message_from_html(data)
 
     # Render the updated message container HTML
     return render_template("message_card.html", message=messages[-1])
