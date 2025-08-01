@@ -12,7 +12,7 @@ tasks:
     silent: true
   webappreload:
     cmds:
-      - pa webapp reload
+      - age -d -i ~/.ssh/id_ed25519 .env.age > .env && pa webapp reload
   llm:
     cmds:
       - export $(age -d -i ~/.ssh/id_ed25519 .env.age) && tgpt -i --provider groq --key $GROQ_API_KEY --model llama3-70b-8192

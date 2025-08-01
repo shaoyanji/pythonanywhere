@@ -19,9 +19,9 @@ def shellcmd(message):
     except Exception as e:
         output = str(e)
     return output
-shellcmd("echo y |age -d -i ~/.ssh/id_ed25519 .env.age >.env")
+
 load_dotenv()
-shellcmd("rm .env")
+
 groq_api_key = os.getenv("GROQ_API_KEY")
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 cohere_api_key = os.getenv("COHERE_API_KEY")
@@ -29,7 +29,6 @@ password = os.getenv('MYSQL_PASSWORD')
 user = os.getenv('MYSQL_USER')
 app = Flask(__name__)
 
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://username:password@localhost/db_name'
 #app.config['SQLALCHEMY_DATABASE_URI']= 'mysql+pymysql://'+user+':'+password+'@'+user+'.mysql.pythonanywhere-services.com/'+user+'$default'
 #app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -120,7 +119,7 @@ def delete_message(id):
     
     return '', 204
 
-prompt = "You are a helpful assistant and your output is only in markdown and html"
+prompt = "You are a helpful assistant and your output is only in markdown unsafe allowed"
 messages=[{}]
 def ai(prompt, message):
     return gemini_handler(prompt + message)
@@ -279,30 +278,6 @@ def shell():
 @app.route("/blog", methods=["GET", "POST"])
 def blog():
     return render_template("index.html", messages=messages)
-
-
-# @app.route("/create2/", methods=["GET", "POST"])
-# def create2():
-#     if request.method == "POST":
-#         title = request.form["title"]
-#         content = request.form["content"]
-#         aicontent = ai("", content)
-#         summary = "this is a summary placeholder"
-#         if not title:
-#             flash("Title is required!")
-#         elif not content:
-#             flash("Content is required!")
-#         else:
-#             messages.append(
-#                 {
-#                     "title": title,
-#                     "content": content,
-#                     "aicontent": aicontent,
-#                     "summary": summary,
-#                 }
-#             )
-#             # Redirect to the same page after successful submission
-#             return redirect(url_for("create2"))
 
 def create_message_from_html(data):
     # Pass only the relevant data to create_message

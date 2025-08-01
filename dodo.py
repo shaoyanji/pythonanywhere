@@ -1,11 +1,18 @@
 from doit.action import CmdAction
 
+def default():
+    def menu():
+        return "doit $(doit list | awk '{print $1}'| fzf)"
+    return {
+            'actions': [CmdAction(menu)],
+            'verbosity': 2,
+            }
 
 def task_webappreload():
     """pythonanywhere reload cmd """
 
     def create_cmd_string():
-        return "pa webapp reload"
+        return "age -d -i ~/.ssh/id_ed25519 .env.age > .env && pa webapp reload"
 
     return {
         'actions': [CmdAction(create_cmd_string)],
