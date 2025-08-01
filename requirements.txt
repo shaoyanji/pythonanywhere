@@ -8,3 +8,4 @@ pymysql
 flask-mysqldb
 mysql-connector
 doit
+typer
