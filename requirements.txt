@@ -5,5 +5,6 @@ markdown2
 python-dotenv
 requests
 pymysql
+flask-mysqldb
 mysql-connector
 doit
