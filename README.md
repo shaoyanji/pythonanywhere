@@ -4,12 +4,12 @@ These are some of the things to do on a flask web server hosted on [pythonanywhe
 
 ## TODO List
 
-- [ ] tgpt webfrontend
+- [x] tgpt webfrontend
 - [ ] gutenbergcache
 - [ ] upx binary caching
 - [ ] htmlq cache
 - [ ] sec.gov reader
-- [ ] pdfgrepper alongside htmlq
+- [ ] pdfgrepper alongside --htmlq--
 - [ ] tgpt --img image generator
 - [ ] github stuff
 - [ ] wikipedia.org
@@ -18,6 +18,16 @@ These are some of the things to do on a flask web server hosted on [pythonanywhe
 - [x] curlified the main api
 - [x] added shell capabilities
 - [x] made css agnostic to utilize [cssbed](cssbed.com)'s list of classless styles. Current one is yorha.
+- [ ] serving html directly from mysql database, would make local development only work with full api calls
+- [x] implemented doit task
+- [x] initialized typer app
+- [ ] began modularizing app
+  - [x] ai
+  - [ ] api
+  - [ ] routes
+  - [x] wsgi
+  - [ ] html
+  - [ ] database
 
 ## Limitations:
 
