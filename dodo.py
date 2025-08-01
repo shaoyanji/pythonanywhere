@@ -1,10 +1,11 @@
 from doit.action import CmdAction
 
-def default():
-    def menu():
-        return "doit $(doit list | awk '{print $1}'| fzf)"
+def task_m():
+    """doit $(doit list | fzf | awk '{print $1}'"""
+    def create_cmd_string():
+        return "echo doit list "
     return {
-            'actions': [CmdAction(menu)],
+            'actions': [CmdAction(create_cmd_string)],
             'verbosity': 2,
             }
 
@@ -42,3 +43,38 @@ def task_gitbackup():
         'actions': [CmdAction(create_cmd_string)],
         'verbosity': 2,
     }
+
+def task_exit():
+    """get out"""
+    def create_cmd_string():
+        return "exit"
+    return {
+        'actions': [CmdAction(create_cmd_string)],
+        'verbosity': 2,
+        }
+def task_llm():
+    """export environment and then groq"""
+    def create_cmd_string():
+        return "export $(age -d -i ~/.ssh/id_ed25519 .env.age) && tgpt -i --provider groq --key $GROQ_API_KEY --model llama3-70b-8192"
+    return {
+            'actions': [CmdAction(create_cmd_string)],
+            'verbosity':2,
+            }
+def task_tailwind():
+    """tailwind install with npm"""
+    def create_cmd_string():
+        return "which npm"
+#        return "npm install tailwindcss @tailwindcss/cli && echo '@import "tailwindcss";' > ./static/input.css && npx @tailwindcss/cli -i ./static/input.css -o ./static/output.css --watch"
+    return {
+            'actions': [CmdAction(create_cmd_string)],
+            'verbosity':2,
+            }
+def task_pythondeps():
+    """python deps install"""
+    def create_cmd_string():
+        return "pip install -r requirements.txt"
+    return {
+            'actions': [CmdAction(create_cmd_string)],
+            'verbosity':2,
+            }
+
