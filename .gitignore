@@ -44,3 +44,4 @@ migrations
 
 static/*.png
 static/*.webmanifest
+.doit*
