@@ -105,7 +105,11 @@ def delete_message(id):
 prompt = (
     "You are a helpful assistant and your output is only in markdown unsafe allowed"
 )
-messages = [{}]
+messages = [{  "title": "title",
+            "content": "content",
+            "aicontent": "aicontent",
+            "summary": "summary",
+            }]
 
 
 def shellcmd(message):
