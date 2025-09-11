@@ -5,9 +5,11 @@ from fuzzywuzzy import fuzz
 import subprocess
 from flask_mysqldb import MySQL
 import app.ai as ai
+
 # import mysql.connector
 # from flask_sqlalchemy import SQLAlchemy
 # from datetime import datetime
+import base64
 
 load_dotenv()
 
@@ -21,6 +23,46 @@ app.config["MYSQL_HOST"] = (
     app.config["MYSQL_USER"] + ".mysql.pythonanywhere-services.com"
 )
 mysql = MySQL(app)
+
+
+def check_basic_auth():
+    """Return the username or None if the header is missing/invalid."""
+    hdr = request.headers.get("Authorization")  # 'Basic dXNlcjpwYXNz'
+    if not hdr or not hdr.startswith("Basic "):
+        return None
+    try:
+        user_pass = base64.b64decode(hdr[6:]).decode()  # 'user:pass'
+        username, password = user_pass.split(":", 1)  # split on first  ':'
+    except Exception:
+        return None
+    # ---- here you validate the pair ----
+    if username == "admin" and password == "secret":
+        return username
+    return None
+
+
+@app.route("/reload", methods=["GET"])
+def protected():
+    user = check_basic_auth()
+    if user is None:
+        # 401 + WWW-Authenticate tells curl to retry with -u
+        return (
+            jsonify(error="Authentication required"),
+            401,
+            {"WWW-Authenticate": 'Basic realm="API"'},
+        )
+    command = [
+        "git",
+        "-C",
+        "/home/jisifu/pythonanywhere",
+        "pull",
+    ]
+    result = subprocess.run(command, check=True, text=True, capture_output=True)
+    if result.returncode == 0:
+        subprocess.run(["pa", "webappreload"], text=True, capture_output=True)
+        return jsonify(message="successful")
+    else:
+        return jsonify(message=f"Hello {user}")
 
 
 @app.route("/api/messages", methods=["GET"])
@@ -105,11 +147,14 @@ def delete_message(id):
 prompt = (
     "You are a helpful assistant and your output is only in markdown unsafe allowed"
 )
-messages = [{  "title": "title",
-            "content": "content",
-            "aicontent": "aicontent",
-            "summary": "summary",
-            }]
+messages = [
+    {
+        "title": "title",
+        "content": "content",
+        "aicontent": "aicontent",
+        "summary": "summary",
+    }
+]
 
 
 def shellcmd(message):
