@@ -59,7 +59,7 @@ def protected():
     ]
     subprocess.run(command, check=True, text=True, capture_output=True)
     # if result.returncode == 0:
-    # subprocess.run(["pa", "webapp", "reload"], text=True, capture_output=True)
+    subprocess.run(["doit", "webappreload"], text=True, capture_output=True)
     # return jsonify(message="successful")
     # else:
     return jsonify(message=f"Hello {user}")
