@@ -36,7 +36,7 @@ def check_basic_auth():
     except Exception:
         return None
     # ---- here you validate the pair ----
-    if username == "admin" and password == "secret":
+    if username == "jisifu" and password == os.getenv("MYSQL_PASSWORD"):
         return username
     return None
 
@@ -51,18 +51,18 @@ def protected():
             401,
             {"WWW-Authenticate": 'Basic realm="API"'},
         )
-        # command = [
-        #     "git",
-        #     "-C",
-        #     "/home/jisifu/pythonanywhere",
-        #     "pull",
-        # ]
-        # result = subprocess.run(command, check=True, text=True, capture_output=True)
-        # if result.returncode == 0:
-        #     subprocess.run(["pa", "webapp", "reload"], text=True, capture_output=True)
-        #     return jsonify(message="successful")
-        # else:
-    return jsonify(message=f"Hello {user}")
+    command = [
+        "git",
+        "-C",
+        "/home/jisifu/pythonanywhere",
+        "pull",
+    ]
+    result = subprocess.run(command, check=True, text=True, capture_output=True)
+    if result.returncode == 0:
+        subprocess.run(["pa", "webapp", "reload"], text=True, capture_output=True)
+        return jsonify(message="successful")
+    else:
+        return jsonify(message=f"Hello {user}")
 
 
 @app.route("/api/messages", methods=["GET"])
