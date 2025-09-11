@@ -62,7 +62,7 @@ def protected():
         #     subprocess.run(["pa", "webapp", "reload"], text=True, capture_output=True)
         #     return jsonify(message="successful")
         # else:
-        return jsonify(message=f"Hello {user}")
+    return jsonify(message=f"Hello {user}")
 
 
 @app.route("/api/messages", methods=["GET"])
