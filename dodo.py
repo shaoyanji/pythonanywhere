@@ -17,7 +17,9 @@ def task_webappreload():
     """pythonanywhere reload cmd"""
 
     def create_cmd_string():
-        return "age -d -i ~/.ssh/id_ed25519 .env.age > .env && pa webapp reload"
+        return (
+            "age -d -i ~/.ssh/id_ed25519 .env.age > .env && pa webapp reload && rm .env"
+        )
 
     return {
         "actions": [CmdAction(create_cmd_string)],
