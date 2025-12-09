@@ -160,7 +160,8 @@ messages = [
 def shellcmd(message):
     command = f"{message.strip()}".split()
     try:
-        result = subprocess.run(command, check=True, text=True, capture_output=True)
+        result = subprocess.run(command, check=True,
+                                text=True, capture_output=True)
         output = result.stdout if result.returncode == 0 else result.stderr
     except Exception as e:
         output = str(e)
@@ -222,9 +223,9 @@ def shell_submit():
         aicontent = shellcmd(content)
         summary = aiflow(
             "",
-            "provide only a short title for the following interaction with u123 and i123, do not write anything else: u123 says"
+            "provide only a short title for the following: <prompt>"
             + content
-            + "i123 responds "
+            + "</prompt> response:"
             + aicontent,
         )
         data = {
@@ -258,9 +259,9 @@ def submit_message():
         aicontent = aiflow(prompt, content)
         summary = aiflow(
             "",
-            "provide only a short title for the following interaction with u123 and i123, do not write anything else: u123 says"
+            "provide only a short title for the following: "
             + content
-            + "i123 responds "
+            + "response: "
             + aicontent,
         )
         data = {
@@ -282,7 +283,8 @@ def search():
     results_html = ""
     for message in reversed(messages):  # Iterate in reverse order
         if (
-            fuzz.partial_ratio(search_term.lower(), message["title"].lower()) >= 90
+            fuzz.partial_ratio(search_term.lower(),
+                               message["title"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["content"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["summary"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["aicontent"].lower())
