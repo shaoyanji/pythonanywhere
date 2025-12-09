@@ -15,7 +15,6 @@ def task_webappreload():
 
     return {
         "actions": ["pa webapp reload"],
-        "file_dep":[".env"],
         "verbosity": 2,
     }
 
@@ -74,16 +73,15 @@ def task_llm():
     }
 
 
-def task_tailwind():
-    """tailwind install with npm"""
-
-    return {
-        "actions": ["npm install tailwindcss @tailwindcss/cli",
-            "echo `@import 'tailwindcss';` > ./app/static/input.css","npx @tailwindcss/cli -i ./app/static/input.css -o ./app/static/output.css --watch"],
-        "targets": ["./app/static/input.css","./app/static/output.css"],
-        "verbosity": 2,
-        "uptodate" : [True] 
-    }
+#def task_tailwind():
+#    """tailwind install with npm"""
+#    return {
+#        "actions": ["npm install tailwindcss @tailwindcss/cli",
+#            "echo `@import 'tailwindcss';` > ./app/static/input.css","npx @tailwindcss/cli -i ./app/static/input.css -o ./app/static/output.css --watch"],
+#        "targets": ["./app/static/input.css","./app/static/output.css"],
+#        "verbosity": 2,
+#        "uptodate" : [True] 
+#    }
 
 
 def task_pythondeps():
