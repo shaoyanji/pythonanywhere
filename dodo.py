@@ -6,8 +6,12 @@ from doit.task import clean_targets
 from doit.tools import run_once
 
 DATA_URLS = [
-        'https://s3.amazonaws.com/pydoit-intermediate/Melee_data.csv.document.md.tpl'
-        'https://github.com/PDFMathTranslate/PDFMathTranslate/raw/refs/heads/main/test/file/translate.cli.font.unknown.pdf'
+        'https://s3.amazonaws.com/pydoit-intermediate/Melee_data.csv.document.md.tpl',
+        'https://github.com/dharmx/walls/raw/refs/heads/main/anime/a_beach_with_a_bridge_and_trees.jpg',
+        'https://github.com/PDFMathTranslate/PDFMathTranslate/raw/refs/heads/main/test/file/translate.cli.font.unknown.pdf',
+        'https://raw.githubusercontent.com/ryangrose/easy-pandoc-templates/refs/heads/master/css/elegant_bootstrap.css',
+        'https://cdn.jsdelivr.net/npm/yorha@1.2.0/dist/yorha.min.css',
+        'https://cdn.jsdelivr.net/gh/kimeiga/bahunya@css/bahunya-0.1.3.css'
         ]
 
 def task_download_data():
@@ -30,17 +34,26 @@ def task_build_markdown_file():
             template = jinja2.Template(fp.read())
 
         with open(targets[0], 'w') as fp:
-            fp.write(template.render(author='PandaDoctor',date="2222-01-01", file='translate.cli.font.unknown.pdf'))
+            fp.write(template.render(author='PandaDoctor',date="2222-01-01", heatmap_filename='a_beach_with_a_bridge_and_trees.jpg'))
     return {'actions': [do_build],
-                    'file_dep': ['translate.cli.font.unknown.pdf', 'Melee_data.csv.document.md.tpl'],
+                    'file_dep': ['a_beach_with_a_bridge_and_trees.jpg', 'Melee_data.csv.document.md.tpl'],
                     'targets': ['Melee_data.csv.document.md'],
                     'clean': [clean_targets]}
 def task_pandoc():
-    cmd = 'pandoc -f markdown -t html'\
-            ' -s %(dependencies)s -o %(targets)s'
+    cmd = 'pandoc -t html5 -f markdown+smart --standalone --self-contained  '\
+                ' -c elegant_bootstrap.css'\
+                ' -s %(dependencies)s -o %(targets)s'
+            #' --css=bahunya-0.1.3.css' \
+            #' --css=yorha.min.css'\
+           
     return {'actions': [cmd],
-            'file_dep': ['Melee_data.csv.document.md'],
+            'file_dep': ['Melee_data.csv.document.md',
+                'elegant_bootstrap.css'
+                #'yorha.min.css'
+                #'bahunya-0.1.3.css'
+                ],
             'targets': ['app/static/x.pdf'],
+            "uptodate": [run_once],
             'clean': [clean_targets]}
 
 def task_createdotenv():
