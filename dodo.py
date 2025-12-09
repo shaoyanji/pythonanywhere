@@ -27,6 +27,20 @@ def task_webappreload():
     }
 
 
+def task_dotenv():
+    """load the dotenv"""
+
+    def create_cmd_string():
+        return (
+            "age -d -i ~/.ssh/id_ed25519 .env.age > .env"
+        )
+
+    return {
+        "actions": [CmdAction(create_cmd_string)],
+        "verbosity": 2,
+    }
+
+
 def task_hello():
     """it writes hello in a hello.txt in the git repo"""
 
@@ -41,10 +55,10 @@ def task_hello():
 
 
 def task_gitbackup():
-    """backs everything up one github"""
+    """backs everything up one github shell execution"""
 
     def create_cmd_string():
-        return "git add . &&git commit -m doitupdate && git push -u"
+        return "git add . && git commit -m doitupdate && git push -u"
 
     return {
         "actions": [CmdAction(create_cmd_string)],
@@ -68,7 +82,7 @@ def task_llm():
     """export environment and then groq"""
 
     def create_cmd_string():
-        return "export $(age -d -i ~/.ssh/id_ed25519 .env.age) && tgpt -i --provider groq --key $GROQ_API_KEY --model llama3-70b-8192"
+        return "export $(age -d -i ~/.ssh/id_ed25519 .env.age) && tgpt -i --provider groq --key $GROQ_API_KEY --model openai/gpt-oss-20b"
 
     return {
         "actions": [CmdAction(create_cmd_string)],

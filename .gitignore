@@ -28,9 +28,9 @@ _templates
 package-lock.json
 .vscode/symbols.json
 
-apps/static/assets/node_modules
-apps/static/assets/yarn.lock
-apps/static/assets/.temp
+app/static/assets/node_modules
+app/static/assets/yarn.lock
+app/static/assets/.temp
 node_modules
 
 postcss.config.cjs
@@ -38,10 +38,10 @@ tailwind.config.js
 
 old/*
 package.json
-static/input.css
+app/static/input.css
 
 migrations
 
-static/*.png
-static/*.webmanifest
+app/static/*.png
+app/static/*.webmanifest
 .doit*
