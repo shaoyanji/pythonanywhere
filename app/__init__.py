@@ -287,16 +287,10 @@ def search():
                                message["title"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["content"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["summary"].lower()) >= 90
-            or fuzz.partial_ratio(search_term.lower(), message["aicontent"].lower())
-            >= 50
+            or fuzz.partial_ratio(search_term.lower(), message["aicontent"].lower()) >= 50
         ):
             results_html += f"""
              <div class="max-w-sm bg-white border rounded-lg shadow-sm p-7 border-neutral-200/60" >
-                <!-- Add edit and favorite buttons here -->
-                <div class="message-buttons">
-                    <button class="edit-button">Edit</button>
-                    <button class="favorite-button">★</button>
-                </div>
                 <div class="message-header">
                     <h3> {message["title"]}  {message["summary"]}</h3>
                 </div>
