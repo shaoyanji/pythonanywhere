@@ -70,6 +70,7 @@ def task_llm():
         "actions": ["export $(age -d -i ~/.ssh/id_ed25519 .env.age) && tgpt -i --provider groq --key $GROQ_API_KEY --model openai/gpt-oss-20b"],
         "file_dep": [".env.age"],
         "verbosity": 2,
+        "uptodate" : [True] 
     }
 
 
