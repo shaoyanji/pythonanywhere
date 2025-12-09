@@ -12,9 +12,12 @@ def hello_world():
             name = data.get("name", "Unknown")
             # 200 OK status code
 
-            return jsonify(
-                {"message": f"Hello, {name}! This is a POST request with data."}
-            ), 200
+            return (
+                jsonify(
+                    {"message": f"Hello, {name}! This is a POST request with data."}
+                ),
+                200,
+            )
         else:
             # 400 Bad Request
             return (

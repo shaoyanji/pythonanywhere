@@ -71,6 +71,7 @@ def task_webappreload():
     """pythonanywhere reload cmd"""
     return {
         "actions": ["pa webapp reload"],
+        "file_dep": [".env"],
         "verbosity": 2,
     }
 

@@ -160,8 +160,7 @@ messages = [
 def shellcmd(message):
     command = f"{message.strip()}".split()
     try:
-        result = subprocess.run(command, check=True,
-                                text=True, capture_output=True)
+        result = subprocess.run(command, check=True, text=True, capture_output=True)
         output = result.stdout if result.returncode == 0 else result.stderr
     except Exception as e:
         output = str(e)
@@ -283,11 +282,11 @@ def search():
     results_html = ""
     for message in reversed(messages):  # Iterate in reverse order
         if (
-            fuzz.partial_ratio(search_term.lower(),
-                               message["title"].lower()) >= 90
+            fuzz.partial_ratio(search_term.lower(), message["title"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["content"].lower()) >= 90
             or fuzz.partial_ratio(search_term.lower(), message["summary"].lower()) >= 90
-            or fuzz.partial_ratio(search_term.lower(), message["aicontent"].lower()) >= 50
+            or fuzz.partial_ratio(search_term.lower(), message["aicontent"].lower())
+            >= 50
         ):
             results_html += f"""
              <div class="max-w-sm bg-white border rounded-lg shadow-sm p-7 border-neutral-200/60" >
