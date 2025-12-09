@@ -5,13 +5,11 @@ from fuzzywuzzy import fuzz
 import subprocess
 from flask_mysqldb import MySQL
 import app.ai as ai
-
+from wasmtime import Store, Module, Instance, Func, FuncType, ValType
 # import mysql.connector
 # from flask_sqlalchemy import SQLAlchemy
 # from datetime import datetime
 import base64
-
-load_dotenv()
 
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI']= 'mysql+pymysql://'+user+':'+password+'@'+user+'.mysql.pythonanywhere-services.com/'+user+'$default'
@@ -24,6 +22,31 @@ app.config["MYSQL_HOST"] = (
 )
 mysql = MySQL(app)
 
+@app.route('/run_wasm')
+def run_wasm():
+    store = Store()
+    module = Module.from_file(store.engine, 'static/wasm.wasm')
+    hello1 = Func(store,FuncType([ValType.i32()],[]), 60)
+    hello2 = Func(store,FuncType([ValType.i32(),ValType.i32()],[ValType.i32()]), 60)
+    hello3 = Func(store,FuncType([ValType.i32(),ValType.i32(),ValType.i32(),ValType.i32()],[ValType.i32()]), 60)
+    instance = Instance(store, module, [hello1,hello3,hello2])
+    #instance.exports(store)["kc"](store)
+    kc_func= instance.exports(store)["kc"]
+    #kc_func= instance.exports(store)["kc"](store)
+    result = kc_func(store,80,50,50)
+    print("Probability of 60 has a Kelly Criteria of:", result)
+    return result
+
+load_dotenv()
+    def say_hello():
+        print("Hello from WebAssembly!")
+
+    hello = Func(store, FuncType([], []), say_hello)
+    instance = Instance(store, module, [hello])
+    run = instance.exports(store)["run"]
+    run(store)
+
+    return jsonify({"message": "Wasm executed successfully!"})
 
 def check_basic_auth():
     """Return the username or None if the header is missing/invalid."""

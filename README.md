@@ -7,9 +7,10 @@ These are some of the things to do on a flask web server hosted on [pythonanywhe
 - [x] tgpt webfrontend
 - [ ] gutenbergcache
 - [ ] upx binary caching
-- [ ] htmlq cache
-- [ ] sec.gov reader
-- [ ] pdfgrepper alongside --htmlq--
+- [ ] scraping
+    - [ ] htmlq cache
+    - [ ] sec.gov reader
+    - [ ] pdfgrepper alongside --htmlq--
 - [ ] tgpt --img image generator
 - [ ] github stuff
 - [ ] wikipedia.org
@@ -21,13 +22,16 @@ These are some of the things to do on a flask web server hosted on [pythonanywhe
 - [ ] serving html directly from mysql database, would make local development only work with full api calls
 - [x] implemented doit task
 - [x] initialized typer app
+- [x] pandoc pdf generator from dodo.py
+- [ ] implement a simple wasm entry
 - [ ] began modularizing app
-  - [x] ai
-  - [ ] api
-  - [ ] routes
-  - [x] wsgi
-  - [ ] html
-  - [ ] database
+    - [x] ai
+    - [ ] api
+    - [ ] routes
+    - [x] wsgi
+    - [ ] html
+    - [x] database
+    - [x] nerdfonts
 
 ## Limitations:
 

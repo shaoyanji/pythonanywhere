@@ -72,6 +72,7 @@ def task_webappreload():
     return {
         "actions": ["pa webapp reload"],
         "file_dep": [".env"],
+        "uptodate": [run_once],
         "verbosity": 2,
     }
 
