@@ -9,3 +9,4 @@ flask-mysqldb
 mysql-connector
 doit
 typer
+wasmtime
