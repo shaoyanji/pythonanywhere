@@ -5,7 +5,7 @@ from fuzzywuzzy import fuzz
 import subprocess
 from flask_mysqldb import MySQL
 import app.ai as ai
-from wasmtime import Store, Module, Instance, Func, FuncType, ValType
+import app.kc as kc
 
 # import mysql.connector
 # from flask_sqlalchemy import SQLAlchemy
@@ -25,27 +25,9 @@ mysql = MySQL(app)
 load_dotenv()
 
 
-@app.route("/run_wasm")
+@app.route("/run_wasm", methods=["GET"])
 def run_wasm():
-    store = Store()
-    module = Module.from_file(store.engine, "static/wasm.wasm")
-    hello1 = Func(store, FuncType([ValType.i32()], []), 60)
-    hello2 = Func(store, FuncType([ValType.i32(), ValType.i32()], [ValType.i32()]), 60)
-    hello3 = Func(
-        store,
-        FuncType(
-            [ValType.i32(), ValType.i32(), ValType.i32(), ValType.i32()],
-            [ValType.i32()],
-        ),
-        60,
-    )
-    instance = Instance(store, module, [hello1, hello3, hello2])
-    # instance.exports(store)["kc"](store)
-    kc_func = instance.exports(store)["kc"]
-    # kc_func= instance.exports(store)["kc"](store)
-    result = kc_func(store, 80, 50, 50)
-    print("Probability of 60 has a Kelly Criteria of:", result)
-    return result
+    return jsonify({"result": kc.run(80,10,10)}), 200
 
 
 def check_basic_auth():
