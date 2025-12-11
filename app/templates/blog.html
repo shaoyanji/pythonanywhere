@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{% block title %}Blog{% endblock %}</h1>
+    {% for post in posts %}
+<details name="focus">
+    <summary><h2>{{ post.name }}</h2></summary>
+     {% autoescape false %}
+    {{ post.content | markdown }}
+     {% endautoescape %}
+
+</details>
+    {% endfor %}
+{% endblock %}

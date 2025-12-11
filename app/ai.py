@@ -20,13 +20,14 @@ prompt = (
 
 
 def aiflow(prompt, message):
-    return gemini_handler(prompt + message)
+    try:
+        return gemini_handler(prompt + message)
+    except:
+        return groq_handler(prompt + message)
 
 
 def groq_handler(message):
-    load_dotenv()
 
-    groq_api_key = os.getenv("GROQ_API_KEY")
     url = "https://api.groq.com/openai/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {groq_api_key}",
@@ -34,7 +35,7 @@ def groq_handler(message):
     }
     data = {
         "messages": [{"role": "user", "content": message}],
-        "model": "llama3-70B-8192",
+        "model": "openai/gpt-oss-20b",
     }
     response = requests.post(url=url, headers=headers, json=data)
     if response.status_code == 200:

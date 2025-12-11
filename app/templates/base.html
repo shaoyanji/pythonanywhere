@@ -1,120 +1,226 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- <link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.css'> -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/yorha@1.2.0/dist/yorha.min.css" type="text/css">
-    <link rel="stylesheet" href="https://www.nerdfonts.com/assets/css/webfont.css" type="text/css">
-    <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet">
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
-    <script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js" integrity="sha384-Akqfrbj/HpNVo8k11SXBb6TlBWmXXlYQrCSqEWmyKJe+hDm3Z/B2WVG4smwBkRVm" crossorigin="anonymous"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
-    <script src="//unpkg.com/alpinejs@3.14.9/dist/cdn.min.js" defer></script>
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <title>{% block title %} {% endblock %} - Flask App on PythonAnywhere</title>
+    {% block head %}
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
+/* Dark Mode Default */
+:root {
+    --background: {{ style.background }};
+    --text: {{ style.text }};
+    --accent: {{ style.accent}};
+    --secondary: {{ style.secondary }};
+    --border: {{ style.border }};
+    --hover: {{ style.hover }};
+}
+
+/* Base Styles */
+body {
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+p {
+    margin-bottom: 1.5rem;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: {{ style.ahover }};
+}
+
+/* Lists */
+ul, ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+li {
+    margin-bottom: 0.5rem;
+}
+
+/* Blockquotes */
+blockquote {
+    background-color: var(--secondary);
+    padding: 1rem;
+    border-left: 4px solid var(--accent);
+    margin-bottom: 1.5rem;
+}
+
+/* Code */
+code {
+    background-color: var(--secondary);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+pre {
+    background-color: var(--secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+th, td {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+
+th {
+    background-color: var(--secondary);
+}
+
+/* Buttons */
+button, input[type="button"], input[type="submit"] {
+    background-color: var(--accent);
+    color: var(--text);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, input[type="button"]:hover, input[type="submit"]:hover {background-color: {{ style.ahover }};}
+
+/* Forms */
+input[type="text"], input[type="email"], textarea, select {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+input[type="text"]:focus, input[type="email"]:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+/* Containers */
+header, main, footer, section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {padding: 1rem;}
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.5rem; }
+}
+
+/* Additional Styling for Impressive Look */
+::-webkit-scrollbar {width: 8px;}
+
+::-webkit-scrollbar-track {background: var(--secondary);}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {background: {{ style.ahover }} ;}
+    /* Highlight Effect on Links */
+a::after {
+    content: '';
+    width: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+}
+a:hover::after {width: 100%;}
+details[open] {
+  box-shadow: 0 2px 5px 0 #666;
+}
+summary:focus {
+    color: {{ style.ahover }};
+}
+    </style>
+	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☄</text></svg>">
+    <!--	<link href="{{ url_for('static', filename='yorha.min.css') }}" rel="stylesheet"> -->
+	<script src="{{ url_for('static', filename='htmx.min.js') }}"></script>
+	<title>{% block title %} {% endblock %} - A simple Flask App</title>
+    {% endblock %}
 </head>
 <body>
-  <div id="wrapper" class="clearfix">
-    <!--start wrapper-->
-         <div id="header" class="clearfix">
-      <!--start header-->
-      <div>
-     <!--start navigation-->
-
-      <div class="nav">
-       <section class="empty" {!! $attributes ?? '' !!}>
-       <div class="container flex flex-col flex-wrap items-center justify-between py-5 mx-auto md:flex-row max-w-7xl">
-        <div class="relative flex flex-col md:flex-row">
-            <a href="/" class="flex items-center mb-5 font-medium text-gray-900 lg:w-auto lg:items-center lg:justify-center md:mb-0">
-                <span class="mx-auto text-xl font-black leading-none text-gray-900 select-none">bountystash<span class="text-indigo-600" data-primary="indigo-600">.</span></span>
-            </a>
-            <nav class="flex flex-wrap items-center mb-5 text-base md:mb-0 md:pl-8 md:ml-8 md:border-l md:border-gray-200">
-                <a href="/" class="mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900"
-                    hx-post="/"
-                    hx-trigger="click"
-                    hx-target="#wrapper"
-                    hx-swap="outerHTML"
-                    hx-boost-immediate="true"
-                >Home</a>
-                <a href="/aipage" class="mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900"
-                    hx-post="/aipage"
-                    hx-trigger="click"
-                    hx-target="#wrapper"
-                    hx-swap="outerHTML"
-                    hx-boost-immediate="true"
-                >AI</a>
-                <a href="/shell" class="mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900"
-                    hx-post="/shell"
-                    hx-trigger="click"
-                    hx-target="#wrapper"
-                    hx-swap="outerHTML"
-                    hx-boost-immediate="true"
-                >Shell</a>
-                <a href="/blog" class="mr-5 font-medium leading-6 text-gray-600 hover:text-gray-900"
-                    hx-post="/blog"
-                    hx-trigger="click"
-                    hx-target="#wrapper"
-                    hx-swap="outerHTML"
-                    hx-boost-immediate="true"
-                >Blog</a>
-            </nav>
-        </div>
-	<div class="inline-flex items-center ml-5 space-x-6 lg:justify-end">
-
-		<p>made with 
-		<i class="nf nf-dev-neovim"></i> 
-		<i class="nf nf-fa-linux"></i> 
-		<i class="nf nf-dev-flask"></i> 
-		<i class="nf nf-seti-python"></i> 
-		<i class="nf nf-dev-mysql"></i> 
-		<i class="nf nf-md-xml"></i> 
-		<i class="nf nf-dev-alpinejs"></i> 
-		<i class="nf nf-seti-jinja"></i> 
-		<i class="nf nf-dev-tailwindcss"></i> 
-		<i class="nf nf-dev-wasm"></i>
-		</p>
-        <!--     <a href="#" class="text-base font-medium leading-6 text-gray-600 whitespace-no-wrap transition duration-150 ease-in-out hover:text-gray-900"> -->
-        <!--         Sign in -->
-        <!--     </a> -->
-        <!--     <a href="#" class="empty" > -->
-        <!--         Sign up -->
-        <!--     </a> -->
-        </div>
-    </div>
-</section>
-      </div>
-      <!--end navigation-->
-       <!--end header-->
-      <div class="container">
-        {% for message in get_flashed_messages() %}
-            <div class="alert">{{ message }}</div>
+<div id="wrapper">
+	<nav>
+        {% for item in navigation %}
+        <button 
+            hx-post="{{ item.href }}"
+            hx-trigger="click"
+			hx-target="#wrapper"
+			hx-swap="outerHTML"
+			hx-boost-immediate="true"
+            hx-replace-url="true"
+            >{{ item.caption }}</button>
         {% endfor %}
-        {% block content %} {% endblock %}
-      </div>
-    </div>
-      <div id="footer">
-      <!--start footer-->
-    <section class="empty" {!! $attributes ?? '' !!}>
-    <div class="container flex flex-col items-center px-8 py-8 mx-auto max-w-7xl sm:flex-row">
-        <a href="/" class="text-xl font-black leading-none text-gray-900 select-none logo">bountystash<span class="text-indigo-600">.</span></a>
-        <p class="mt-4 text-sm text-gray-500 sm:ml-4 sm:pl-4 sm:border-l sm:border-gray-200 sm:mt-0">&copy; 2025 
+	</nav>
+	<div id="content">
+		{% for message in get_flashed_messages() %}
+		<div class="alert">{{ message }}</div>
+		{% endfor %}
+		{% block content %} {% endblock %}
+	</div>
+	<footer>
+        {% block footer %}
+        <p><a href="/">jisifu</a>&copy; 2025 </p>
+	    <a href="https://github.com/shaoyanji/pythonanywhere"><svg width="24px" height="24px" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg></a>
+	    <p>made with 
+            {% for item in svg %}
+            <svg width="{{ item.size }}px" height="{{ item.size }}px" fill="currentcolor" viewBox="0 0 {{ item.size }} {{ item.size }}" xmlns="http://www.w3.org/2000/svg">
+                <title>{{ item.name }}</title>  
+                <path d="{{ item.pathd }}"/>
+            </svg>
+            {% endfor %}
         </p>
-	<span class="inline-flex justify-center mt-4 space-x-5 sm:ml-auto sm:mt-0 sm:justify-start">
-	<a href="https://github.com/shaoyanji/pythonanywhere" class="text-gray-400 hover:text-gray-500">
-		<span class="sr-only">GitHub</span>
-		<i class="nf nf-dev-github"></i>
-                <!-- <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"> -->
-                <!--     <path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /> -->
-                <!-- </svg> -->
-            </a>
-       </span>
-    </div>
-</section>
-<!--end footer-->
-  </div>
-<!--end wrapper-->
+        {% endblock %}
+    </footer>
+</div>
 </body>
 </html>
 

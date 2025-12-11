@@ -1,76 +1,44 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 
 {% block content %}
-<h1>{% block title %} {% endblock %}</h1>
+<h1>{% block title %}Shell Access {% endblock %}</h1>
     <ul>
-        <div class="w-full max-w-xs mx-auto">
         <form id="form"
               >
         <textarea type="text" placeholder="Type your message here." 
               class="empty"
               name="content" rows="3" cols ="50"
-            x-data="{ 
-                resize () { 
-                    $el.style.height = '0px'; 
-                    $el.style.height = $el.scrollHeight + 'px' 
-                } 
-            }"
-            x-init="resize()"
-            @input="resize()"
-            type="text" 
-        >         
-        </textarea>
+        ></textarea>
+	<br>
         <button
-              hx-post="/shell_submit"
-
-hx-trigger="click"
-              hx-target=".message-container"
-              hx-swap="afterbegin"
-              hx-boost-immediate="true"
-              hx-indicator=".htmx-indicator"         id="submit-button">Submit Shell Command</button>
+		hx-post="/shell_submit"
+		hx-trigger="click"	
+		hx-target=".message-container"
+		hx-swap="afterbegin"
+		hx-boost-immediate="true"
+		hx-indicator=".htmx-indicator"
+		id="submit-button">Submit Shell Command</button>
         </form>
-      </div>
     </ul>
     <ul>
-        <div class="w-full max-w-xs mx-auto">
             <input name="search" type="text" placeholder="Begin Typing to Search"
-                class="flex w-full h-10 px-3 py-2 text-sm bg-white border rounded-md border-neutral-300 ring-offset-background placeholder:text-neutral-500 focus:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-400 disabled:cursor-not-allowed disabled:opacity-50"
                  hx-post="/search" 
                  hx-trigger="input changed delay:500ms, search" 
                  hx-target=".message-container"
                  hx-indicator=".htmx-indicator"
                 />
-        </div>
     </ul>
-
     <ul>
-      
       <span class="htmx-indicator"> 
         <!-- <img src="https://htmx.org/img/bars.svg"/> -->
          Searching... 
       </span>
         <ul class="message-container" hx-sortable >
             {% for message in messages[::-1] %}
-
-<div x-data="{ 
-        activeAccordion: '', 
-        setActiveAccordion(id) { 
-            this.activeAccordion = (this.activeAccordion == id) ? '' : id 
-        } 
-    }" class="relative w-full max-w-md mx-auto text-sm font-normal">
-    <div x-data="{ id: $id('accordion') }" :class="{ 'text-neutral-900': activeAccordion==id, 'text-neutral-600 hover:text-neutral-900': activeAccordion!=id }" class="cursor-pointer group">
-        <button @click="setActiveAccordion(id)" class="flex items-center justify-between w-full p-4 pb-1 text-left select-none">
-            <span>{{ message['title'] }} {{ message['summary'] | safe }}</span>
-            <svg class="w-5 h-5 duration-300 ease-out" :class="{ '-rotate-[45deg]': activeAccordion==id }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m6-6H6" /></svg>
-        </button>
-        <div x-show="activeAccordion==id" x-collapse x-cloak>
-            <div class="p-4 pt-2 opacity-70">
+	<details>
+            <summary>{{ message['title'] }} {{ message['summary'] | safe }}</summary>
                 {{ message['aicontent'] | safe }}
-            </div>
-        </div>
-    </div>
-</div>
-
+	</details>
             {% endfor %}
         </ul >
     </ul>
