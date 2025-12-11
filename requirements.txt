@@ -10,3 +10,4 @@ mysql-connector
 doit
 typer
 wasmtime
+jinjaMarkdown
