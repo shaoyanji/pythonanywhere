@@ -29,10 +29,8 @@ mysql = MySQL(app)
 app.jinja_env.add_extension(markdownExtension)
 
 pantry_id = os.getenv("PANTRY_ID")
-messages = []
+messages, navigation, posts, navigation2 = [], [], [], []
 prompt = ""
-navigation = []
-posts = []
 
 
 def init():
@@ -74,6 +72,12 @@ def init():
             {"href": "/aipage", "caption": "ai"},
             {"href": "/shell", "caption": "shell"},
             {"href": "/blog", "caption": "blog"},
+        ],
+        "navigation2": [
+            {"href": "/alt2", "caption": "home"},
+            {"href": "/alt2", "caption": "ai"},
+            {"href": "/alt2", "caption": "shell"},
+            {"href": "/alt2", "caption": "blog"},
         ],
         "svg": [
             {
@@ -254,6 +258,26 @@ def aiflow(prompt, message):
     return ai.aiflow(prompt, message)
 
 
+@app.route("/alt", methods=["GET", "POST"])
+def alt():
+    return render_template(
+        "index2.html", messages=messages, navigation=navigation2, svg=svg, style=style
+    )
+
+
+@app.route("/alt2", methods=["GET", "POST"])
+def alt2():
+    results_html = ""
+    results_html += f"""
+            <details>
+                <summary> This can be... </summary>
+                a crazy way to make a website
+            </details>
+            """
+    return results_html
+
+
+# htmz, fixi and aki
 @app.route("/", methods=["GET", "POST"])
 def index():
     return render_template(
