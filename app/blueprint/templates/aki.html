@@ -1,0 +1,20 @@
+{% extends 'layout.html' %}
+{% block head %}
+     <script>
+         window.onload=()=>{document.querySelectorAll("[url][fn]").forEach(e=>{const r=e.attributes;e[r.fn.value]=()=>{fetch(r.url.value).then(e=>e.json()).then(e=>{Object.entries(e).forEach(e=>{Object.entries(e[1]).forEach(r=>{document.querySelector(e[0])[r[0]]=r[1]})})})}})};
+     </script>
+{% endblock %}
+{% block nav %}
+        {% for item in navigation %}
+        <button 
+            url="{{ item.href }}"
+            fn="onclick"
+            >{{ item.caption }}</button>
+        {% endfor %}
+{% endblock %}
+{% block content %}
+<h1>{% block title %} Aki Index {% endblock %}</h1>
+	<main id="content">
+        <p>It might make sense to place the headers at the bottom for the document And I might need a boolean to switch base inherits?</p>
+	</main>
+{% endblock %}

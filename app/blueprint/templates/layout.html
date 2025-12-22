@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% block head %}
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -182,24 +181,17 @@ summary:focus {
     </style>
 	<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☄</text></svg>">
     <!--	<link href="{{ url_for('static', filename='yorha.min.css') }}" rel="stylesheet"> -->
-	<script src="{{ url_for('static', filename='htmx.min.js') }}"></script>
 	<title>{% block title %} {% endblock %} - A simple Flask App</title>
+    {% block head %}
     {% endblock %}
 </head>
 <body>
 <div id="wrapper">
-	<nav>
-        {% for item in navigation %}
-        <button 
-            hx-post="{{ item.href }}"
-            hx-trigger="click"
-			hx-target="#wrapper"
-			hx-swap="outerHTML"
-			hx-boost-immediate="true"
-            hx-replace-url="true"
-            >{{ item.caption }}</button>
-        {% endfor %}
+    <nav>
+    {% block nav %}
+    {% endblock %}
 	</nav>
+	
 	<div id="content">
 		{% for message in get_flashed_messages() %}
 		<div class="alert">{{ message }}</div>

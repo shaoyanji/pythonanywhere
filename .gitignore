@@ -45,3 +45,4 @@ migrations
 app/static/*.png
 app/static/*.webmanifest
 .doit*
+**/*.swp

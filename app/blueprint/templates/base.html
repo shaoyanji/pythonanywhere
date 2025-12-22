@@ -1,0 +1,23 @@
+
+{% extends 'layout.html' %}
+{% block head %}
+	<script src="{{ url_for('static', filename='htmx.min.js') }}"></script>
+{% endblock %}
+{% block nav %}
+        {% for item in navigation %}
+        <button 
+            hx-post="{{ item.href }}"
+            hx-trigger="click"
+			hx-target="#wrapper"
+			hx-swap="outerHTML"
+			hx-boost-immediate="true"
+            hx-replace-url="true"
+            >{{ item.caption }}</button>
+        {% endfor %}
+{% endblock %}
+{% block content %}
+	<main id="content">
+        <p>It might make sense to place the headers at the bottom for the document And I might need a boolean to switch base inherits?</p>
+	</main>
+{% endblock %}
+

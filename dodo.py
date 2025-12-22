@@ -15,6 +15,7 @@ DATA_URLS = [
         ]
 
 def task_download_data():
+    """ downloads data """
 #    def print_url(URL):
 #        print 'File was retrieved from: {0}'.format(URL)
     for URL in DATA_URLS:
@@ -27,7 +28,7 @@ def task_download_data():
                 }
 
 def task_build_markdown_file():
-    
+    """ builds the markdown file with jinja """ 
     def do_build(targets):
 
         with open(targets[0] + '.tpl') as fp:
@@ -40,6 +41,7 @@ def task_build_markdown_file():
                     'targets': ['Melee_data.csv.document.md'],
                     'clean': [clean_targets]}
 def task_pandoc():
+    """ uses pandoc """
     cmd = 'pandoc -t html5 -f markdown+smart --standalone --self-contained  '\
                 ' -c elegant_bootstrap.css'\
                 ' -s %(dependencies)s -o %(targets)s'
@@ -84,7 +86,7 @@ def task_gitbackup():
     }
 
 def task_destroydotenv():
-    """load the dotenv"""
+    """remove the dotenv"""
     return {
         "actions": ['rm .env'], 
         "verbosity": 2,
