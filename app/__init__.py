@@ -24,9 +24,10 @@ env = Environment(loader=FileSystemLoader("templates"))
 load_dotenv()
 
 app = Flask(__name__)
-app.register_blueprint(simple_page)
+app.register_blueprint(aki)
+# app.register_blueprint(aki, url_prefix="/aki")
+app.register_blueprint(simple_page, url_prefix="/htmx")
 app.register_blueprint(fixi, url_prefix="/fixi")
-app.register_blueprint(aki, url_prefix="/aki")
 app.register_blueprint(htmz, url_prefix="/htmz")
 app.register_blueprint(wasm, url_prefix="/wasm")
 app.register_blueprint(api, url_prefix="/api/v1")
@@ -43,6 +44,8 @@ mysql = MySQL(app)
 
 app.jinja_env.add_extension(markdownExtension)
 
+def dbexport():
+    return mysql
 
 def check_basic_auth():
     """Return the username or None if the header is missing/invalid."""
