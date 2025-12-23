@@ -6,15 +6,13 @@
 {% endblock %}
 {% block nav %}
         {% for item in navigation %}
-        <button 
+        <a href="#"
             url="{{ item.href }}"
             fn="onclick"
-            >{{ item.caption }}</button>
+            >{{ item.caption }}</a><br>
         {% endfor %}
 {% endblock %}
 {% block content %}
-<h1>{% block title %} Aki Index {% endblock %}</h1>
-	<main id="content">
-        <p>It might make sense to place the headers at the bottom for the document And I might need a boolean to switch base inherits?</p>
-	</main>
+<div class="block"><h1>{% block title %} Aki Index {% endblock %}</h1></div>
+<p>It might make sense to place the headers at the bottom for the document And I might need a boolean to switch base inherits?</p>
 {% endblock %}

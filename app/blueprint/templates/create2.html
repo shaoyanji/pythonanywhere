@@ -5,8 +5,8 @@
         <div>
         <textarea type="text" placeholder="Type your message here." 
               class="empty"
-              name="content" rows="3" cols="50"
-              hx-post="/submit_message"
+              name="content" rows="3"
+              hx-post="submit_message"
               hx-trigger="input changed delay:500ms, content" 
               hx-target=".message-container"
               hx-swap="afterbegin"
@@ -17,7 +17,7 @@
     <ul>
         <div >
             <input name="search" type="text" placeholder="Begin Typing to Search"
-                 hx-post="/search" 
+                 hx-post="search" 
                  hx-trigger="input changed delay:500ms, search" 
                  hx-target=".message-container"
                  hx-indicator=".htmx-indicator"
@@ -28,15 +28,16 @@
     <ul>
       <span class="htmx-indicator"> 
         <!-- <img src="https://htmx.org/img/bars.svg"/> -->
+        <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
+        <span class="sr-only">Loading...</span>
          Searching... 
       </span>
         <ul class="message-container" hx-sortable >
             {% for message in messages[::-1] %}
-
-<details>
-	<summary>{{ message['title'] }} {{ message['summary'] | safe }}</summary>
-	{{ message['aicontent'] | safe }}
-</details>
+            <details>
+            	<summary>{{ message['title'] }} {{ message['summary'] | safe }}</summary>
+	            {{ message['aicontent'] | safe }}
+            </details>
             {% endfor %}
         </ul >
     </ul>

@@ -7,11 +7,11 @@
               >
         <textarea type="text" placeholder="Type your message here." 
               class="empty"
-              name="content" rows="3" cols ="50"
+              name="content" rows="3" 
         ></textarea>
 	<br>
         <button
-		hx-post="/shell_submit"
+		hx-post="shell_submit"
 		hx-trigger="click"	
 		hx-target=".message-container"
 		hx-swap="afterbegin"
@@ -22,7 +22,7 @@
     </ul>
     <ul>
             <input name="search" type="text" placeholder="Begin Typing to Search"
-                 hx-post="/search" 
+                 hx-post="search" 
                  hx-trigger="input changed delay:500ms, search" 
                  hx-target=".message-container"
                  hx-indicator=".htmx-indicator"

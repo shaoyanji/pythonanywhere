@@ -44,5 +44,6 @@ migrations
 
 app/static/*.png
 app/static/*.webmanifest
+app/static/fonts
 .doit*
 **/*.swp
