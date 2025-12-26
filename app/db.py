@@ -10,14 +10,17 @@ mydb = mysql.connector.connect(
     host=f"{user}.mysql.pythonanywhere-services.com",
     user=f"{user}",
     passwd=f"{password}",
+    database=f"{user}$default"
 )
+#mycursor = mydb.cursor()
 
-my_cursor = mydb.cursor()
+#mycursor.execute("SHOW TABLES")
+
+#for x in mycursor:
+#  print(x)
+#my_cursor = mydb.cursor()
 # my_cursor.execute("CREATE DATABASE "+mydb.user+"$users")
 #my_cursor.execute("SHOW DATABASES")
 # for db in my_cursor:
 #    print(db)
 # my_cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'jisifu$default';")
-my_cursor.execute("SELECT * FROM information_schema.tables WHERE table_schema = 'jisifu$default';")
-for db in my_cursor:
-    print(db)

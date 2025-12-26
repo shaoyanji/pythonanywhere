@@ -9,6 +9,7 @@ from fuzzywuzzy import fuzz
 from flask_mysqldb import MySQL
 import app.ai as ai
 import app.kc as kc
+from app.db import mydb
 from app.init import init
 from app.helpers.pantry_wrapper import get_contents, create_basket
 from app.helpers import bind_to_globals
@@ -90,10 +91,11 @@ def create_message_from_html(data):
         "(title, content, aicontent, summary) "
         "VALUES (%(title)s, %(content)s, %(aicontent)s, %(summary)s)"
     )
-    cursor = mysql.connection.cursor()
+    cursor = mydb.cursor()
     cursor.execute(query, data)
-    mysql.connection.commit()
-
+    mydb.commit()
+    cursor.close()
+    mydb.close()
 
 #   return render_template("create2.html", messages=messages)
 @simple_page.route("/shell_submit", methods=["POST"])

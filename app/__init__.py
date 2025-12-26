@@ -11,6 +11,7 @@ from jinjaMarkdown.markdownExtension import markdownExtension
 from app.blueprint.simple_page import simple_page
 from app.blueprint.fixi import fixi
 from app.blueprint.aki import aki
+from app.blueprint.cssr import cssr
 from app.blueprint.htmz import htmz
 from app.blueprint.wasm import wasm
 from app.blueprint.api import api
@@ -26,6 +27,7 @@ load_dotenv()
 app = Flask(__name__)
 app.register_blueprint(aki)
 # app.register_blueprint(aki, url_prefix="/aki")
+app.register_blueprint(cssr, url_prefix="/cssr")
 app.register_blueprint(simple_page, url_prefix="/htmx")
 app.register_blueprint(fixi, url_prefix="/fixi")
 app.register_blueprint(htmz, url_prefix="/htmz")
@@ -106,7 +108,6 @@ def create_message():
     cursor = mysql.connection.cursor()
     cursor.execute(query, data)
     mysql.connection.commit()
-
     return jsonify({"id": cursor.lastrowid}), 201
 
 
@@ -116,7 +117,6 @@ def get_message(id):
     cursor = mysql.connection.cursor()
     cursor.execute(query, (id,))
     message = cursor.fetchone()
-
     if not message:
         return jsonify({"error": "Message not found"}), 404
 

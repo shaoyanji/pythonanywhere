@@ -18,9 +18,7 @@ from jinjaMarkdown.markdownExtension import markdownExtension
 messages, navigation, posts = [], [], []
 prompt = ""
 
-
 bind_to_globals(init())
-
 
 aki = Blueprint("aki", __name__, template_folder="templates")
 # akiworks
@@ -29,36 +27,39 @@ def index():
     return render_template(
         "aki.html", messages=messages, navigation=
         [
-            {"href": "home", "caption": "home"},
-            {"href": "aipage", "caption": "ai"},
-            {"href": "shell", "caption": "shell"},
-            {"href": "blog", "caption": "blog"},
-        ],svg=svg, style=style
+            {"href": "home", "caption": "~"},
+            {"href": "about", "caption": "~/about"},
+            {"href": "projects", "caption": "~/projects"},
+            {"href": "blog", "caption": "~/blog"},
+        ], svg=svg, style=style
     )
 @aki.route("/home", methods=["GET", "POST"])
 def homepage():
     return jsonify({
         "title": {"innerText": "home"},
-        "h1": {"style": "color:navy;","innerText": "you have been aki-ed"},
-        "p": {"innerText": "this is now my page! a shell page"}
+        "swap": {"innerText": "does this work?"}
     })
 
-@aki.route("/aipage", methods=["GET", "POST"])
-def aipage():
+@aki.route("/about", methods=["GET", "POST"])
+def about():
     return jsonify({
-        "h1": {"style": "color:navy;","innerText": "you have been aki-ed"},
-        "p": {"innerText": "this is now my page!"}
+        "h1": {"innerText": "about"},
+        "swap": {"innerText": "this is now my page!"}
     })
+# stripped down blog2.html partial that is dynamically rendered
 @aki.route("/blog", methods=["GET", "POST"])
 def blog():
+    dyntemp =render_template("blog2.html",posts=posts)
     return jsonify({
-        "h1": {"style": "color:navy;","innerText": "you have been aki-ed"},
-        "p": {"innerText": "this is now my page! a blog page specifically!"}
+        "h1": {"innerText": "blog"},
+        "swap": {"innerHTML": dyntemp},
+        "swapcode": {"innerText": dyntemp}
     })
-@aki.route("/shell", methods=["GET", "POST"])
-def shell():
+# embedding flask render template into aki
+@aki.route("/projects", methods=["GET", "POST"])
+def projects():
     return jsonify({
-        "h1": {"style": "color:navy;","innerText": "you have been aki-ed"},
-        "p": {"innerText": "this is now my page! a shell page"}
+        "h1": {"innerText": "projects"},
+        "swap": {"innerHTML": render_template("hi.html")}
     })
 

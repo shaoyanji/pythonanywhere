@@ -88,17 +88,20 @@ def gemini_handler(message):
     ]
     result = subprocess.run(command, check=True, text=True, capture_output=True)
     if result.returncode == 0:
-        try:
-            response_data = json.loads(result.stdout)
-            return (
-                response_data.get("candidates", [{}])[0]
-                .get("content", {})
-                .get("parts", [{}])[0]
-                .get("text", "")
-            )
+        response_data = json.loads(result.stdout)
+        if response_data.get("error").get("code") == 429:
+            return groq_handler(message)
+        else:
+            try:
+                return (
+                    response_data.get("candidates", [{}])[0]
+                    .get("content", {})
+                    .get("parts", [{}])[0]
+                    .get("text", "")
+                )
 
-        except json.JSONDecodeError:
-            return "json decoder return failed on the response"
+            except json.JSONDecodeError:
+                return "json decoder return failed on the response"
     else:
         return groq_handler(message)
 

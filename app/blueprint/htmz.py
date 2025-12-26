@@ -40,16 +40,16 @@ def htmzpage():
 
 @htmz.route("/cat", methods=["GET", "POST"])
 def cat():
-    return "<main id='main'>this is a cat</main>"
+    return "<div id='content'>this is a cat</div>"
 
 @htmz.route("/dog", methods=["GET", "POST"])
 def dog():
-    return  "<main id='main'>this is a dog</main>"
+    return  "<div id='content'>this is a dog</div>"
 
 @htmz.route("/horse", methods=["GET", "POST"])
 def horse():
-    return "<main id='main'>this is a god damn horse</main>"
+    return "<div id='content'>this is a god damn horse</div>"
 @htmz.route("/htmz", methods=["GET", "POST"])
 def htmz2():
-    return "<main id='main'>this is htmz within htmz</main>"
+    return "<div id='content'>this is htmz within htmz</div>"
 

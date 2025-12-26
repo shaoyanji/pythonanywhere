@@ -7,9 +7,9 @@
     <!--	<link href="{{ url_for('static', filename='yorha.min.css') }}" rel="stylesheet"> -->
     <!--    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> -->
 	<title>{% block title %} {% endblock %} - A simple Flask App</title>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/msw.css') }}"> -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/neoenvs.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/msw.css') }}"> 
-    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/Fork-Awesome-1.2.0/css/fork-awesome.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fonts/Fork-Awesome-1.2.0/css/fork-awesome.min.css') }}" defer>
     {% block head %}
     {% endblock %}
 

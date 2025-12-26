@@ -4,12 +4,14 @@
 {% endblock %}
 {% block nav %}
         {% for item in navigation %}
-        <a href="{{ item.href }}#main">{{ item.caption }}</a><br>
+        <a href="{{ item.href }}#content">{{ item.caption }}</a><br>
         {% endfor %}
 {% endblock %}
 {% block content %}
+<div id="content">
 <h1>{% block title %} HTMZ Index {% endblock %}</h1>
 <p>It might make sense to place the headers at the bottom for the document And I might need a boolean to switch base inherits?</p>
+</div>
 <!-- This will be replaced by the loaded HTML -->
 <iframe hidden name=htmz onload="setTimeout(()=>document.querySelector(contentWindow.location.hash||null)?.replaceWith(...contentDocument.body.childNodes))"></iframe>
 <base target=htmz>

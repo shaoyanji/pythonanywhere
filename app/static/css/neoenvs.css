@@ -25,9 +25,6 @@
 		--c-alt-bg: #e5e5e5;
 	}
 
-	a {
-		text
-	}
 }
 
 body {
@@ -119,7 +116,7 @@ footer {
 }
 
 
-h1, h2, h3. h4, h5, h6 {
+h1, h2, h3, h4, h5, h6 {
 	margin-top: 0;
 	margin-bottom: 1rem;
 }
@@ -344,3 +341,176 @@ input[type="submit"]:hover {
 footer > p {
 	margin: .5em;
 }
+/* Global Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Dark Mode Default */
+:root {
+	--background: #040304;
+	--text: #fff5ee;
+	--accent: #10a0a0;
+	--secondary: #10a0a0;
+	--border: #211921;
+	--hover: #211921;
+}
+
+/* Base Styles */
+body {
+    background-color: var(--background);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+p {
+    margin-bottom: 1.5rem;
+}
+
+a {
+    color: var(--accent);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--hover);
+}
+
+/* Lists */
+ul, ol {
+    margin-bottom: 1.5rem;
+    padding-left: 2rem;
+}
+
+li {
+    margin-bottom: 0.5rem;
+}
+
+/* Blockquotes */
+blockquote {
+    background-color: var(--secondary);
+    padding: 1rem;
+    border-left: 4px solid var(--accent);
+    margin-bottom: 1.5rem;
+}
+
+/* Code */
+code {
+    background-color: var(--secondary);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+pre {
+    background-color: var(--secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.5rem;
+}
+
+th, td {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    text-align: left;
+}
+
+th {
+    background-color: var(--secondary);
+}
+
+/* Buttons */
+button, input[type="button"], input[type="submit"] {
+    background-color: var(--accent);
+    color: var(--text);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover, input[type="button"]:hover, input[type="submit"]:hover {background-color: var(--hover);}
+
+/* Forms */
+input[type="text"], input[type="email"], textarea, select {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: var(--secondary);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    margin-bottom: 1rem;
+}
+
+input[type="text"]:focus, input[type="email"]:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+/* Containers */
+header, main, footer, section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    body {padding: 1rem;}
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.5rem; }
+}
+
+/* Additional Styling for Impressive Look */
+::-webkit-scrollbar {width: 8px;}
+
+::-webkit-scrollbar-track {background: var(--secondary);}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+    /* Highlight Effect on Links */
+a::after {
+    content: '';
+    width: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+}
+a:hover::after {width: 100%;}
+details[open] {
+  box-shadow: 0 2px 5px 0 #666;
+}
+summary:focus {
+    color: var(--hover);
+}
+

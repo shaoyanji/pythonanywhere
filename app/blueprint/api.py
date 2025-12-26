@@ -6,26 +6,14 @@ import os
 import subprocess
 import base64
 from dotenv import load_dotenv
-import app.ai as ai
+from app.ai import aiflow
 import app.kc as kc
+from app.db import mydb
 from app.helpers.pantry_wrapper import get_contents, create_basket
 from app.helpers import bind_to_globals
 
-import mysql.connector
-
 from dotenv import load_dotenv
 
-load_dotenv()
-password = os.getenv("MYSQL_PASSWORD")
-user = os.getenv("MYSQL_USER")
-mydb = mysql.connector.connect(
-    host=f"{user}.mysql.pythonanywhere-services.com",
-    user=f"{user}",
-    passwd=f"{password}",
-)
-my_cursor = mydb.cursor()
-# my_cursor.execute("CREATE DATABASE "+mydb.user+"$users")
-#my_cursor.execute("SHOW DATABASES")
 api = Blueprint('api', __name__)
 #mysql = MySQL(app)
 
@@ -39,41 +27,40 @@ api = Blueprint('api', __name__)
 #    except TemplateNotFound:
 #        abort(404)
 
-@api.route("/test", methods=["GET"])
-def test():
-    return "testing complete"
-
 @api.route("/messages", methods=["GET"])
 def get_messages():
-    #cur = mysql.connection.cursor()
-    #my_cursor.execute("SHOW DATABASES")
-    #my_cursor.execute("SELECT table_name FROM information_schema.tables WHERE table_schema = 'jisifu$default';")
-    #cur.execute("SELECT * FROM messages")
-    #result = my_cursor.fetchall()
-    #return (result)
-    return jsonify("hi")
+    cur = mydb.cursor()
+    cur.execute("SELECT * FROM messages")
+    result = cur.fetchall()
+    #cur.close()
+    #mydb.close()
+    return jsonify(result)
 
 
-#@api.route("/messages", methods=["POST"])
-#def create_message():
-#    data = request.json
-#    query = (
-#        "INSERT INTO messages "
-#        "(title, content, aicontent, summary) "
-#        "VALUES (%(title)s, %(content)s, %(aicontent)s, %(summary)s)"
-#    )
-#    cursor = mysql.connection.cursor()
-#    cursor.execute(query, data)
-#    mysql.connection.commit()
-#    return jsonify({"id": cursor.lastrowid}), 201
+@api.route("/messages", methods=["POST"])
+def create_message():
+    data = request.json
+    query = (
+        "INSERT INTO messages "
+        "(title, content, aicontent, summary) "
+        "VALUES (%(title)s, %(content)s, %(aicontent)s, %(summary)s)"
+    )
+    cursor = mydb.cursor()
+    cursor.execute(query, data)
+    mydb.commit()
+    #cursor.close()
+    #mydb.close()
+    return jsonify({"id": cursor.lastrowid}), 201
 
 
 @api.route("/messages/<int:id>", methods=["GET"])
 def get_message(id):
     query = "SELECT * FROM messages WHERE id = %s"
-    cursor = mysql.connection.cursor()
+    cursor = mydb.cursor()
     cursor.execute(query, (id,))
     message = cursor.fetchone()
+    #cursor.close()
+    #mydb.close()
 
     if not message:
         return jsonify({"error": "Message not found"}), 404
@@ -90,7 +77,7 @@ def update_message(id):
     )
     data = request.json
 
-    cursor = mysql.connection.cursor()
+    cursor = mydb.cursor()
     cursor.execute(
         query,
         (
@@ -105,7 +92,9 @@ def update_message(id):
     if cursor.rowcount == 0:
         return jsonify({"error": "Message not found"}), 404
 
-    mysql.connection.commit()
+    mydb.commit()
+    #cursor.close()
+    #mydb.close()
 
     return jsonify({"id": id}), 200
 
@@ -113,13 +102,15 @@ def update_message(id):
 @api.route("/messages/<int:id>", methods=["DELETE"])
 def delete_message(id):
     query = "DELETE FROM messages WHERE id = %s"
-    cursor = mysql.connection.cursor()
+    cursor = mydb.cursor()
     cursor.execute(query, (id,))
 
     if cursor.rowcount == 0:
         return jsonify({"error": "Message not found"}), 404
 
-    mysql.connection.commit()
+    mydb.commit()
+    #cursor.close()
+    #mydb.close()
 
     return "", 204
 
@@ -163,3 +154,55 @@ def protected():
     # return jsonify(message="successful")
     # else:
     # return jsonify(message=f"Hello {user}")
+
+
+def create_message_from_html(data):
+    # Pass only the relevant data to create_message
+    query = (
+        "INSERT INTO messages "
+        "(title, content, aicontent, summary) "
+        "VALUES (%(title)s, %(content)s, %(aicontent)s, %(summary)s)"
+    )
+    cursor = mydb.cursor()
+    cursor.execute(query, data)
+    mydb.commit()
+   # cursor.close()
+   # mydb.close()
+@api.route("/llm", methods=["POST"])
+def llm():
+    data = request.json
+    content = data.get("content")
+    # Process form data
+    # title = request.form['title']
+    # content = request.form["content"]
+    title = content
+    # Validate form data
+    
+    if not content:
+        return ((data)), 201
+#        aicontent = aiflow(
+#            "(provide an alternative to this approach): ",
+#            ["content"],
+#        )
+    # need to add a bit to amend with an alternative using a SQL find ID and PUT
+    else:
+        aicontent = aiflow("",content)
+        summary = "summary not available"
+        query = (
+            "INSERT INTO messages "
+            "(title, content, aicontent, summary) "
+            "VALUES (%(title)s, %(content)s, %(aicontent)s, %(summary)s)"
+        )
+        data = {
+            "title": title,
+            "content": content,
+            "aicontent": aicontent,
+            "summary": summary,
+        }
+        cursor = mydb.cursor()
+        cursor.execute(query, data)
+        mydb.commit()
+    #    cursor.close()
+    #    mydb.close()
+        return jsonify({"id": cursor.lastrowid}), 201
+

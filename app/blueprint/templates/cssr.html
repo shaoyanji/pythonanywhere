@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block head %}
+     <style>
+section:not(:target) {
+  display: none;
+     </style>
+{% endblock %}
+{% block nav %}
+        {% for item in navigation %}
+        <a href="#{{ item.href }}">{{ item.caption }}</a><br>
+        {% endfor %}
+{% endblock %}
+{% block content %}
+{% for item in navigation %}
+<section id="{{ item.href }}">
+<div class="block"><h1>{% block title %}  {% endblock %}{{ item.caption }}</h1></div>
+    <p>{{ item.caption }}</p>
+</section>
+{% endfor %}
+
+{% endblock %}
