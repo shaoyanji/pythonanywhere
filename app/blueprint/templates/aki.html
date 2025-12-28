@@ -11,6 +11,7 @@
             fn="onclick"
             >{{ item.caption }}</a><br>
         {% endfor %}
+        <details><summary>kellycriterion</summary>{% include 'wasm.html' %}</details>
 {% endblock %}
 {% block content %}
 <div class="block"><h1>{% block title %} Aki Index {% endblock %}</h1></div>
@@ -36,3 +37,4 @@
     </pre>
 </details>
 {% endblock %}
+

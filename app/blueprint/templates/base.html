@@ -7,7 +7,7 @@
         {% for item in navigation %}
         <a href="{{ item.href }}"
             hx-post="{{ item.href }}"
-            hx-trigger="click"
+            hx-trigger="mousedown"
 			hx-target="body"
 			hx-swap="innerHTML"
 			hx-boost-immediate="true"

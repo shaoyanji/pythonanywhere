@@ -4,6 +4,9 @@ These are some of the things to do on a flask web server hosted on [pythonanywhe
 
 ## TODO List
 
+- [ ] build a partial html api segment
+- [x] modularized db
+- [x] add the monospace tree to the navbar
 - [x] tgpt webfrontend
 - [ ] gutenbergcache
 - [ ] upx binary caching
@@ -32,6 +35,7 @@ These are some of the things to do on a flask web server hosted on [pythonanywhe
     - [ ] html
     - [x] database
     - [x] nerdfonts
+    - [x] fork awesome font for lighterweight icons
 
 ## Limitations:
 

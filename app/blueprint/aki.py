@@ -27,10 +27,12 @@ def index():
     return render_template(
         "aki.html", messages=messages, navigation=
         [
-            {"href": "home", "caption": "~"},
+            {"href": "home", "caption": "~/"},
             {"href": "about", "caption": "~/about"},
             {"href": "projects", "caption": "~/projects"},
             {"href": "blog", "caption": "~/blog"},
+            {"href": "shell", "caption": "~/cmd"},
+            {"href": "kc?p=60&reward=50&risk=50", "caption": "~/kctest"},
         ], svg=svg, style=style
     )
 @aki.route("/home", methods=["GET", "POST"])
@@ -63,3 +65,24 @@ def projects():
         "swap": {"innerHTML": render_template("hi.html")}
     })
 
+@aki.route("/shell", methods=["GET", "POST"])
+def shell():
+    return jsonify({
+        "h1": {"innerText": "projects"},
+        "swap": {"innerHTML": render_template("form2.html")}
+    })
+@aki.route("/kc", methods=["GET", "POST"])
+def kcc():
+    p = request.args.get('p')
+    reward = request.args.get('reward')
+    risk = request.args.get('risk')
+    if p:
+        p=int(p)
+        reward=int(reward)
+        risk=int(risk)
+    #kelly_fraction = p - ((100 - p) * risk / reward)
+    kelly_fraction = kc.run(p,reward,risk) 
+    return jsonify({
+        "h1": {"innerText": "projects"},
+        "result": {"innerHTML": f'{kelly_fraction}'}
+    })
