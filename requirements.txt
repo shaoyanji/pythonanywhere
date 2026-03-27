@@ -1,8 +1,6 @@
 bleach
 flask
 markdown2
-mysql-connector-python
 python-dotenv
 requests
 typer
-wasmtime
