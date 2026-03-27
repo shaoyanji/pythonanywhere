@@ -1,0 +1,73 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Content</p>
+    <h1>Manage {{ content_type }} records</h1>
+    <form class="segmented" method="get">
+      <select name="type">
+        <option value="post" {% if content_type == 'post' %}selected{% endif %}>Posts</option>
+        <option value="page" {% if content_type == 'page' %}selected{% endif %}>Pages</option>
+        <option value="experiment" {% if content_type == 'experiment' %}selected{% endif %}>Experiments</option>
+      </select>
+      <button type="submit">Switch</button>
+    </form>
+  </section>
+
+  <section class="panel stack">
+    <h2>Upsert {{ content_type }}</h2>
+    <form class="admin-form" method="post">
+      <input type="hidden" name="type" value="{{ content_type }}">
+      <label>Slug <input name="slug" required></label>
+      <label>Title <input name="title" required></label>
+      {% if content_type == "page" %}
+        <label>Sort Order <input name="sort_order" type="number" value="0"></label>
+      {% endif %}
+      {% if content_type == "post" %}
+        <label>Excerpt <textarea name="excerpt" rows="3"></textarea></label>
+        <label>Published At <input name="published_at" type="datetime-local"></label>
+      {% endif %}
+      {% if content_type == "experiment" %}
+        <label>Summary <textarea name="summary" rows="3"></textarea></label>
+        <label>Demo Path <input name="demo_path" placeholder="/wasm"></label>
+        <label>Source Path <input name="source_path" placeholder="app/blueprints/experiments.py"></label>
+        <label class="checkbox-row"><input name="featured" type="checkbox"> Featured</label>
+      {% endif %}
+      <label>Status
+        <select name="status">
+          <option value="draft">Draft</option>
+          <option value="published" selected>Published</option>
+          <option value="archived">Archived</option>
+        </select>
+      </label>
+      <label>Body Markdown <textarea name="body_markdown" rows="14" required></textarea></label>
+      <button type="submit">Save {{ content_type }}</button>
+    </form>
+  </section>
+
+  <section class="panel stack">
+    <h2>Existing records</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Slug</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td>{{ row.slug }}</td>
+              <td>{{ row.title }}</td>
+              <td>{{ row.status }}</td>
+              <td>{{ row.updated_at }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

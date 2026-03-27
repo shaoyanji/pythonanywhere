@@ -1,0 +1,18 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Admin</p>
+    <h1>Private controls</h1>
+    <p class="lede">Operational pages are separated from the public site and protected with a dedicated admin credential.</p>
+  </section>
+  <section class="admin-metrics">
+    {% for key, value in summary.items() %}
+      <article class="metric-card">
+        <p>{{ key.replace('_', ' ') }}</p>
+        <strong>{{ value }}</strong>
+      </article>
+    {% endfor %}
+  </section>
+{% endblock %}
+

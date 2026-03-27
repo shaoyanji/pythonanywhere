@@ -1,0 +1,25 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Deploy</p>
+    <h1>PythonAnywhere-safe deployment hooks</h1>
+    <p class="lede">Reload behavior stays private and uses dedicated admin auth rather than database credentials.</p>
+    <form method="post">
+      <button type="submit">Run deploy actions</button>
+    </form>
+  </section>
+  {% if results %}
+    <section class="panel stack">
+      <h2>Results</h2>
+      {% for result in results %}
+        <article class="deploy-result">
+          <h3>{{ result.command }}</h3>
+          <p>Status: {{ "ok" if result.ok else "failed" }} ({{ result.returncode }})</p>
+          {% if result.stdout %}<pre>{{ result.stdout }}</pre>{% endif %}
+          {% if result.stderr %}<pre>{{ result.stderr }}</pre>{% endif %}
+        </article>
+      {% endfor %}
+    </section>
+  {% endif %}
+{% endblock %}

@@ -1,13 +1,8 @@
-python-Levenshtein
+bleach
 flask
-fuzzywuzzy
 markdown2
+mysql-connector-python
 python-dotenv
 requests
-pymysql
-flask-mysqldb
-mysql-connector
-doit
 typer
 wasmtime
-jinjaMarkdown

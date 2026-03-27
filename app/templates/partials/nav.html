@@ -1,0 +1,13 @@
+<aside class="site-nav">
+  <a class="site-mark" href="{{ url_for('public.home') }}">
+    <span class="site-mark__mono">~/lab</span>
+    <span class="site-mark__name">{{ app_name }}</span>
+  </a>
+  <p class="site-nav__intro">{{ site_settings.get('nav_intro', app_tagline) }}</p>
+  <nav class="site-nav__links" aria-label="Primary">
+    {% for item in nav_items %}
+      <a href="{{ item.href }}">{{ item.label }}</a>
+    {% endfor %}
+  </nav>
+</aside>
+

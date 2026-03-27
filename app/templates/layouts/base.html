@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{{ app_name }}{% endblock %}</title>
+    <meta name="description" content="{{ site_settings.get('meta_description', app_tagline) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
+  </head>
+  <body>
+    <div class="site-shell">
+      {% include "partials/nav.html" %}
+      <main class="site-main">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+    {% include "partials/footer.html" %}
+  </body>
+</html>
+

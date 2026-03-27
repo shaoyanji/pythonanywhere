@@ -1,40 +1,25 @@
 #!/usr/bin/env python
 import typer
-import app.ai
+
+from app.factory import create_app
+from app.services.migrations import migrate_database
+
 
 cli = typer.Typer()
 
-defaultprompt = "output in ansi:"
-
 
 @cli.command()
-def bot(message: str, prompt: str = defaultprompt):
-    response = app.ai.aiflow(prompt, message)
-    print(f"{response}")
+def serve(host: str = "127.0.0.1", port: int = 5000, debug: bool = True):
+    app = create_app()
+    app.run(host=host, port=port, debug=debug)
 
 
-@cli.command()
-def shell(cmd: str):
-    response = app.shellcmd(f"{cmd}")
-    print(f"{response}")
-
-
-@cli.command()
-def groq(message: str):
-    response = app.ai.groq_handler(message)
-    print(f"{response}")
-
-
-@cli.command()
-def cohere(message: str):
-    response = app.ai.cohere_handler(message)
-    print(f"{response}")
-
-
-@cli.command()
-def gemini(message: str):
-    response = app.ai.gemini_handler(message)
-    print(f"{response}")
+@cli.command("db-upgrade")
+def db_upgrade():
+    app = create_app()
+    with app.app_context():
+        migrate_database()
+    print("Database migrations applied.")
 
 
 if __name__ == "__main__":

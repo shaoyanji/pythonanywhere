@@ -1,0 +1,27 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Prompt Runs</p>
+    <h1>Legacy and current AI output log</h1>
+    <p class="lede">Existing `messages` rows are migrated here so prompt history stays preserved without driving the public content model.</p>
+  </section>
+  <section class="panel stack">
+    {% for run in prompt_runs %}
+      <details class="prompt-card">
+        <summary>{{ run.title }} <span>{{ run.kind }}</span></summary>
+        <div class="prompt-grid">
+          <section>
+            <h3>Input</h3>
+            <pre>{{ run.input_text }}</pre>
+          </section>
+          <section>
+            <h3>Output</h3>
+            <pre>{{ run.output_text }}</pre>
+          </section>
+        </div>
+      </details>
+    {% endfor %}
+  </section>
+{% endblock %}
+
