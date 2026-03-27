@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS prompt_runs (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    input_text MEDIUMTEXT,
+    output_text MEDIUMTEXT,
+    summary TEXT,
+    kind VARCHAR(64) NOT NULL DEFAULT 'manual',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

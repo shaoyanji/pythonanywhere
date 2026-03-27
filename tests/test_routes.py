@@ -26,6 +26,12 @@ class RouteSmokeTests(unittest.TestCase):
     def _public_patches(self):
         return ExitStack()
 
+    def _json_headers(self):
+        return {
+            "Accept": "application/json",
+            "X-Requested-With": "json-runtime",
+        }
+
     def test_public_routes_render(self):
         with ExitStack() as stack:
             stack.enter_context(
@@ -91,6 +97,140 @@ class RouteSmokeTests(unittest.TestCase):
         health = self.client.get("/api/health")
         self.assertEqual(health.status_code, 200)
         self.assertEqual(health.json, {"ok": True})
+
+    def test_public_routes_bootstrap_without_content_tables(self):
+        for path in ("/", "/notes", "/experiments", "/about"):
+            response = self.client.get(path)
+            self.assertEqual(response.status_code, 200, path)
+
+    def test_public_routes_support_json_patches(self):
+        with ExitStack() as stack:
+            stack.enter_context(
+                patch(
+                    "app.blueprints.public.fetch_site_settings",
+                    return_value={
+                        "hero_title": "Hero",
+                        "hero_intro": "Intro",
+                        "meta_description": "desc",
+                        "footer_note": "foot",
+                    },
+                )
+            )
+            stack.enter_context(
+                patch(
+                    "app.blueprints.public.fetch_navigation",
+                    return_value=[
+                        {"label": "Home", "href": "/", "kind": "public"},
+                        {"label": "Notes", "href": "/notes", "kind": "public"},
+                    ],
+                )
+            )
+            stack.enter_context(
+                patch(
+                    "app.blueprints.public.fetch_page",
+                    side_effect=lambda slug: {
+                        "slug": slug,
+                        "title": slug.title(),
+                        "body_html": "<p>Body</p>",
+                    },
+                )
+            )
+            stack.enter_context(
+                patch(
+                    "app.blueprints.public.fetch_posts",
+                    return_value=[
+                        {
+                            "slug": "first-note",
+                            "title": "First Note",
+                            "excerpt": "Excerpt",
+                            "body_html": "<p>Body</p>",
+                        }
+                    ],
+                )
+            )
+            stack.enter_context(
+                patch(
+                    "app.blueprints.public.fetch_post",
+                    return_value={
+                        "slug": "first-note",
+                        "title": "First Note",
+                        "excerpt": "Excerpt",
+                        "body_html": "<p>Body</p>",
+                    },
+                )
+            )
+            stack.enter_context(
+                patch(
+                    "app.blueprints.public.fetch_experiments",
+                    return_value=[
+                        {
+                            "slug": "aki-json-dom",
+                            "title": "AKI JSON-DOM navigation",
+                            "summary": "Summary",
+                            "demo_path": "/experiments/wasm-kelly-criterion/demo",
+                        }
+                    ],
+                )
+            )
+            stack.enter_context(
+                patch(
+                    "app.blueprints.public.fetch_experiment",
+                    return_value={
+                        "slug": "aki-json-dom",
+                        "title": "AKI JSON-DOM navigation",
+                        "summary": "Summary",
+                        "body_html": "<p>Body</p>",
+                        "demo_path": "/experiments/wasm-kelly-criterion/demo",
+                        "source_path": "app/experiments/aki.py",
+                    },
+                )
+            )
+
+            for path in (
+                "/",
+                "/notes",
+                "/notes/first-note",
+                "/experiments",
+                "/experiments/aki-json-dom",
+                "/about",
+            ):
+                response = self.client.get(path, headers=self._json_headers())
+                self.assertEqual(response.status_code, 200, path)
+                self.assertIn("#content", response.json)
+                self.assertIn("#site-nav", response.json)
+                self.assertIn("title", response.json)
+
+    def test_kelly_calculator_returns_targeted_patch(self):
+        with ExitStack() as stack:
+            stack.enter_context(
+                patch(
+                    "app.blueprints.public.fetch_site_settings",
+                    return_value={"meta_description": "desc", "footer_note": "foot"},
+                )
+            )
+            stack.enter_context(
+                patch(
+                    "app.blueprints.public.fetch_navigation",
+                    return_value=[
+                        {"label": "Home", "href": "/", "kind": "public"},
+                        {"label": "Experiments", "href": "/experiments", "kind": "public"},
+                    ],
+                )
+            )
+
+            response = self.client.get(
+                "/experiments/wasm-kelly-criterion/demo",
+                headers=self._json_headers(),
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertIn("#content", response.json)
+
+            calculate = self.client.get(
+                "/experiments/wasm-kelly-criterion/demo/calculate?probability=60&reward=50&risk=25"
+            )
+            self.assertEqual(calculate.status_code, 200)
+            self.assertIn("#demo-result", calculate.json)
+            self.assertIn("40.0", calculate.json["#demo-result"]["innerHTML"])
 
     def test_admin_routes_require_authentication(self):
         for path in ("/admin/", "/admin/content", "/admin/prompts", "/admin/deploy"):

@@ -28,10 +28,9 @@ def render_markdown(markdown_text: str | None) -> str:
 def _safe_query(default, fn):
     try:
         return fn()
-    except MySQLError:
-        if current_app.config.get("TESTING"):
-            return default
-        raise
+    except MySQLError as error:
+        current_app.logger.warning("Content query fallback triggered: %s", error)
+        return default
 
 
 def fetch_navigation():
@@ -64,117 +63,141 @@ def fetch_site_settings() -> dict[str, str]:
 
 
 def fetch_page(slug: str) -> dict[str, Any] | None:
-    cursor = dict_cursor()
-    cursor.execute(
-        """
-        SELECT id, slug, title, body_markdown, status, sort_order, created_at, updated_at
-        FROM pages
-        WHERE slug = %s AND status = 'published'
-        LIMIT 1
-        """,
-        (slug,),
-    )
-    row = cursor.fetchone()
-    cursor.close()
-    if row:
-        row["body_html"] = render_markdown(row["body_markdown"])
-    return row
+    def _run():
+        cursor = dict_cursor()
+        cursor.execute(
+            """
+            SELECT id, slug, title, body_markdown, status, sort_order, created_at, updated_at
+            FROM pages
+            WHERE slug = %s AND status = 'published'
+            LIMIT 1
+            """,
+            (slug,),
+        )
+        row = cursor.fetchone()
+        cursor.close()
+        if row:
+            row["body_html"] = render_markdown(row["body_markdown"])
+        return row
+
+    return _safe_query(None, _run)
 
 
 def fetch_posts(limit: int | None = None):
-    cursor = dict_cursor()
-    query = """
-        SELECT id, slug, title, excerpt, body_markdown, status, published_at, created_at, updated_at
-        FROM posts
-        WHERE status = 'published'
-        ORDER BY COALESCE(published_at, created_at) DESC, id DESC
-    """
-    if limit is not None:
-        query += " LIMIT %s"
-        cursor.execute(query, (limit,))
-    else:
-        cursor.execute(query)
-    rows = cursor.fetchall()
-    cursor.close()
-    return rows
+    def _run():
+        cursor = dict_cursor()
+        query = """
+            SELECT id, slug, title, excerpt, body_markdown, status, published_at, created_at, updated_at
+            FROM posts
+            WHERE status = 'published'
+            ORDER BY COALESCE(published_at, created_at) DESC, id DESC
+        """
+        if limit is not None:
+            query += " LIMIT %s"
+            cursor.execute(query, (limit,))
+        else:
+            cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    return _safe_query([], _run)
 
 
 def fetch_post(slug: str):
-    cursor = dict_cursor()
-    cursor.execute(
-        """
-        SELECT id, slug, title, excerpt, body_markdown, status, published_at, created_at, updated_at
-        FROM posts
-        WHERE slug = %s AND status = 'published'
-        LIMIT 1
-        """,
-        (slug,),
-    )
-    row = cursor.fetchone()
-    cursor.close()
-    if row:
-        row["body_html"] = render_markdown(row["body_markdown"])
-    return row
+    def _run():
+        cursor = dict_cursor()
+        cursor.execute(
+            """
+            SELECT id, slug, title, excerpt, body_markdown, status, published_at, created_at, updated_at
+            FROM posts
+            WHERE slug = %s AND status = 'published'
+            LIMIT 1
+            """,
+            (slug,),
+        )
+        row = cursor.fetchone()
+        cursor.close()
+        if row:
+            row["body_html"] = render_markdown(row["body_markdown"])
+        return row
+
+    return _safe_query(None, _run)
 
 
 def fetch_experiments(featured_only: bool = False):
-    cursor = dict_cursor()
-    query = """
-        SELECT id, slug, title, summary, body_markdown, demo_path, source_path, status, featured, created_at, updated_at
-        FROM experiments
-        WHERE status = 'published'
-    """
-    if featured_only:
-        query += " AND featured = 1"
-    query += " ORDER BY featured DESC, updated_at DESC, id DESC"
-    cursor.execute(query)
-    rows = cursor.fetchall()
-    cursor.close()
-    return rows
+    def _run():
+        cursor = dict_cursor()
+        query = """
+            SELECT id, slug, title, summary, body_markdown, demo_path, source_path, status, featured, created_at, updated_at
+            FROM experiments
+            WHERE status = 'published'
+        """
+        if featured_only:
+            query += " AND featured = 1"
+        query += " ORDER BY featured DESC, updated_at DESC, id DESC"
+        cursor.execute(query)
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    return _safe_query([], _run)
 
 
 def fetch_experiment(slug: str):
-    cursor = dict_cursor()
-    cursor.execute(
-        """
-        SELECT id, slug, title, summary, body_markdown, demo_path, source_path, status, featured, created_at, updated_at
-        FROM experiments
-        WHERE slug = %s AND status = 'published'
-        LIMIT 1
-        """,
-        (slug,),
-    )
-    row = cursor.fetchone()
-    cursor.close()
-    if row:
-        row["body_html"] = render_markdown(row["body_markdown"])
-    return row
+    def _run():
+        cursor = dict_cursor()
+        cursor.execute(
+            """
+            SELECT id, slug, title, summary, body_markdown, demo_path, source_path, status, featured, created_at, updated_at
+            FROM experiments
+            WHERE slug = %s AND status = 'published'
+            LIMIT 1
+            """,
+            (slug,),
+        )
+        row = cursor.fetchone()
+        cursor.close()
+        if row:
+            row["body_html"] = render_markdown(row["body_markdown"])
+        return row
+
+    return _safe_query(None, _run)
 
 
 def fetch_prompt_runs(limit: int = 50):
-    cursor = dict_cursor()
-    cursor.execute(
-        """
-        SELECT id, title, input_text, output_text, summary, kind, created_at
-        FROM prompt_runs
-        ORDER BY created_at DESC, id DESC
-        LIMIT %s
-        """,
-        (limit,),
-    )
-    rows = cursor.fetchall()
-    cursor.close()
-    return rows
+    def _run():
+        cursor = dict_cursor()
+        cursor.execute(
+            """
+            SELECT id, title, input_text, output_text, summary, kind, created_at
+            FROM prompt_runs
+            ORDER BY created_at DESC, id DESC
+            LIMIT %s
+            """,
+            (limit,),
+        )
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    return _safe_query([], _run)
 
 
 def fetch_content_summary():
-    cursor = dict_cursor()
-    summary = {}
-    for table_name in ("pages", "posts", "experiments", "prompt_runs"):
-        cursor.execute(f"SELECT COUNT(*) AS count FROM {table_name}")
-        summary[table_name] = cursor.fetchone()["count"]
-    cursor.close()
-    return summary
+    def _run():
+        cursor = dict_cursor()
+        summary = {}
+        for table_name in ("pages", "posts", "experiments", "prompt_runs"):
+            cursor.execute(f"SELECT COUNT(*) AS count FROM {table_name}")
+            summary[table_name] = cursor.fetchone()["count"]
+        cursor.close()
+        return summary
+
+    return _safe_query(
+        {"pages": 0, "posts": 0, "experiments": 0, "prompt_runs": 0},
+        _run,
+    )
 
 
 def fetch_admin_content(content_type: str):
@@ -186,11 +209,14 @@ def fetch_admin_content(content_type: str):
         "post": "posts",
         "experiment": "experiments",
     }[content_type]
-    cursor = dict_cursor()
-    cursor.execute(f"SELECT * FROM {table} ORDER BY updated_at DESC, id DESC")
-    rows = cursor.fetchall()
-    cursor.close()
-    return rows
+    def _run():
+        cursor = dict_cursor()
+        cursor.execute(f"SELECT * FROM {table} ORDER BY updated_at DESC, id DESC")
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    return _safe_query([], _run)
 
 
 def upsert_content(content_type: str, payload: dict[str, Any]) -> None:
