@@ -1,0 +1,12 @@
+{% from "partials/cards.html" import experiment_card %}
+
+<section class="panel stack">
+  <p class="eyebrow">Experiments</p>
+  <h1>Curated prototypes that still behave like prototypes</h1>
+  <p class="lede">Experiments stay first-class here, with demos and detail pages that update in place instead of bouncing through hard page refreshes.</p>
+</section>
+<section class="card-grid">
+  {% for experiment in experiments %}
+    {{ experiment_card(experiment) }}
+  {% endfor %}
+</section>

@@ -1,7 +1,15 @@
 {% macro post_card(post) -%}
   <article class="card card-post">
     <p class="eyebrow">Note</p>
-    <h3><a href="{{ url_for('public.note_detail', slug=post.slug) }}">{{ post.title }}</a></h3>
+    <h3>
+      <a
+        href="{{ url_for('public.note_detail', slug=post.slug) }}"
+        url="{{ url_for('public.note_detail', slug=post.slug) }}"
+        fn="onclick"
+      >
+        {{ post.title }}
+      </a>
+    </h3>
     <p>{{ post.excerpt }}</p>
   </article>
 {%- endmacro %}
@@ -9,11 +17,26 @@
 {% macro experiment_card(experiment) -%}
   <article class="card card-experiment">
     <p class="eyebrow">Experiment</p>
-    <h3><a href="{{ url_for('public.experiment_detail', slug=experiment.slug) }}">{{ experiment.title }}</a></h3>
+    <h3>
+      <a
+        href="{{ url_for('public.experiment_detail', slug=experiment.slug) }}"
+        url="{{ url_for('public.experiment_detail', slug=experiment.slug) }}"
+        fn="onclick"
+      >
+        {{ experiment.title }}
+      </a>
+    </h3>
     <p>{{ experiment.summary }}</p>
     {% if experiment.demo_path %}
-      <p class="card-meta">Demo: <a href="{{ experiment.demo_path }}">{{ experiment.demo_path }}</a></p>
+      <p class="card-meta">
+        Demo:
+        <a
+          href="{{ experiment.demo_path }}"
+          {% if experiment.demo_path.startswith('/') %}url="{{ experiment.demo_path }}" fn="onclick"{% endif %}
+        >
+          {{ experiment.demo_path }}
+        </a>
+      </p>
     {% endif %}
   </article>
 {%- endmacro %}
-

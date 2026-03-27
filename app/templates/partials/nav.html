@@ -1,13 +1,28 @@
 <aside class="site-nav">
-  <a class="site-mark" href="{{ url_for('public.home') }}">
+  {% set current_path = request.path %}
+  <a
+    class="site-mark{% if current_path == '/' %} is-active{% endif %}"
+    data-nav-link
+    href="{{ url_for('public.home') }}"
+    url="{{ url_for('public.home') }}"
+    fn="onclick"
+  >
     <span class="site-mark__mono">~/lab</span>
     <span class="site-mark__name">{{ app_name }}</span>
   </a>
   <p class="site-nav__intro">{{ site_settings.get('nav_intro', app_tagline) }}</p>
-  <nav class="site-nav__links" aria-label="Primary">
+  <nav class="site-nav__links" id="site-nav-links" aria-label="Primary">
     {% for item in nav_items %}
-      <a href="{{ item.href }}">{{ item.label }}</a>
+      {% set is_active = item.href != '/' and (current_path == item.href or current_path.startswith(item.href ~ '/')) %}
+      <a
+        class="{% if is_active %}is-active{% endif %}"
+        data-nav-link
+        href="{{ item.href }}"
+        url="{{ item.href }}"
+        fn="onclick"
+      >
+        {{ item.label }}
+      </a>
     {% endfor %}
   </nav>
 </aside>
-

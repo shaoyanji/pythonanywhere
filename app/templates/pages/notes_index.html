@@ -1,18 +1,7 @@
 {% extends "layouts/base.html" %}
-{% from "partials/cards.html" import post_card %}
 
 {% block title %}Notes | {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel stack">
-    <p class="eyebrow">Notes</p>
-    <h1>Writing, field notes, and implementation logs</h1>
-    <p class="lede">Long-form content stays as markdown in the database and is rendered safely on demand.</p>
-  </section>
-  <section class="card-grid">
-    {% for post in posts %}
-      {{ post_card(post) }}
-    {% endfor %}
-  </section>
+  {% include "partials/public/notes_index_content.html" %}
 {% endblock %}
-

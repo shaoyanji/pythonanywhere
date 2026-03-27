@@ -1,18 +1,7 @@
 {% extends "layouts/base.html" %}
-{% from "partials/cards.html" import experiment_card %}
 
 {% block title %}Experiments | {{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="panel stack">
-    <p class="eyebrow">Experiments</p>
-    <h1>Curated prototypes, not the site architecture</h1>
-    <p class="lede">Older interaction ideas still exist, but they now live as explicit experiments with context and boundaries.</p>
-  </section>
-  <section class="card-grid">
-    {% for experiment in experiments %}
-      {{ experiment_card(experiment) }}
-    {% endfor %}
-  </section>
+  {% include "partials/public/experiments_index_content.html" %}
 {% endblock %}
-

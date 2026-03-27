@@ -6,15 +6,19 @@
     <title>{% block title %}{{ app_name }}{% endblock %}</title>
     <meta name="description" content="{{ site_settings.get('meta_description', app_tagline) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}">
+    <script defer src="{{ url_for('static', filename='js/json-actions.js') }}"></script>
   </head>
   <body>
     <div class="site-shell">
-      {% include "partials/nav.html" %}
-      <main class="site-main">
-        {% block content %}{% endblock %}
+      <div id="site-nav">
+        {% include "partials/nav.html" %}
+      </div>
+      <main class="site-main" id="site-main">
+        <div id="content">
+          {% block content %}{% endblock %}
+        </div>
       </main>
     </div>
     {% include "partials/footer.html" %}
   </body>
 </html>
-

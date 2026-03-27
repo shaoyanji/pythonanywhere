@@ -1,50 +1,7 @@
 {% extends "layouts/base.html" %}
-{% from "partials/cards.html" import post_card, experiment_card %}
 
 {% block title %}{{ app_name }}{% endblock %}
 
 {% block content %}
-  <section class="hero panel">
-    <p class="eyebrow">Personal Lab / Knowledge Garden</p>
-    <h1>{{ hero_title }}</h1>
-    <p class="lede">{{ hero_intro }}</p>
-    {% if home_page %}
-      <div class="prose">{{ home_page.body_html | safe }}</div>
-    {% endif %}
-  </section>
-
-  <section class="panel stack">
-    <div class="section-head">
-      <h2>Recent Notes</h2>
-      <a href="{{ url_for('public.notes_index') }}">All notes</a>
-    </div>
-    <div class="card-grid">
-      {% for post in featured_posts %}
-        {{ post_card(post) }}
-      {% endfor %}
-    </div>
-  </section>
-
-  <section class="panel stack">
-    <div class="section-head">
-      <h2>Featured Experiments</h2>
-      <a href="{{ url_for('public.experiments_index') }}">All experiments</a>
-    </div>
-    <div class="card-grid">
-      {% for experiment in featured_experiments %}
-        {{ experiment_card(experiment) }}
-      {% endfor %}
-    </div>
-  </section>
-
-  {% if about_page %}
-    <section class="panel stack">
-      <div class="section-head">
-        <h2>About the site</h2>
-        <a href="{{ url_for('public.about') }}">Full page</a>
-      </div>
-      <div class="prose">{{ about_page.body_html | safe }}</div>
-    </section>
-  {% endif %}
+  {% include "partials/public/home_content.html" %}
 {% endblock %}
-

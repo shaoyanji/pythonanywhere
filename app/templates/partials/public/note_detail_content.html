@@ -1,0 +1,8 @@
+<article class="panel prose prose-long">
+  <p class="eyebrow">Note</p>
+  <h1>{{ post.title }}</h1>
+  {% if post.excerpt %}
+    <p class="lede">{{ post.excerpt }}</p>
+  {% endif %}
+  {{ post.body_html | safe }}
+</article>

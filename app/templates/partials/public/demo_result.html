@@ -1,0 +1,13 @@
+{% if result is not none %}
+  <div class="card">
+    <p class="eyebrow">Result</p>
+    <h2>{{ result }}</h2>
+    <p>{{ values.probability }}% edge with {{ values.reward }} reward and {{ values.risk }} risk.</p>
+  </div>
+{% else %}
+  <div class="card">
+    <p class="eyebrow">Result</p>
+    <h2>Waiting for inputs</h2>
+    <p>Adjust the values to calculate the suggested Kelly fraction without leaving the page.</p>
+  </div>
+{% endif %}

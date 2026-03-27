@@ -1,0 +1,19 @@
+<article class="panel prose prose-long">
+  <p class="eyebrow">Experiment</p>
+  <h1>{{ experiment.title }}</h1>
+  <p class="lede">{{ experiment.summary }}</p>
+  <div class="meta-row">
+    {% if experiment.demo_path %}
+      <a
+        href="{{ experiment.demo_path }}"
+        {% if experiment.demo_path.startswith('/') %}url="{{ experiment.demo_path }}" fn="onclick"{% endif %}
+      >
+        Open demo
+      </a>
+    {% endif %}
+    {% if experiment.source_path %}
+      <a href="{{ experiment.source_path }}">View source path</a>
+    {% endif %}
+  </div>
+  {{ experiment.body_html | safe }}
+</article>
