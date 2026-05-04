@@ -30,7 +30,7 @@ def db_upgrade():
     """Apply database migrations (auto-decrypts .env.age if needed)."""
     import os
     import subprocess
-    from dotenv import load_dotenv()
+    from dotenv import load_dotenv
 
     # Auto-decrypt .env.age if .env doesn't exist
     if not os.path.exists(".env") and os.path.exists(".env.age"):
