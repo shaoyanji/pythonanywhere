@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from typing import Any
 
 import bleach
@@ -8,6 +9,8 @@ from flask import current_app
 from mysql.connector import Error as MySQLError
 
 from app.extensions import dict_cursor, get_db
+
+_is_production = os.getenv("FLASK_ENV") == "production"
 
 
 def render_markdown(markdown_text: str | None) -> str:
@@ -25,12 +28,23 @@ def render_markdown(markdown_text: str | None) -> str:
     return bleach.linkify(cleaned)
 
 
+def get_cached_html(row: dict, markdown_key: str = "body_markdown") -> str:
+    """Return cached HTML if available, otherwise render and return."""
+    if row and row.get("body_html"):
+        return row["body_html"]
+    return render_markdown(row.get(markdown_key)) if row else ""
+
+
 def _safe_query(default, fn):
     try:
         return fn()
     except MySQLError as error:
-        current_app.logger.warning("Content query fallback triggered: %s", error)
-        return default
+        if _is_production:
+            current_app.logger.error("Database query failed: %s", error)
+            return default
+        else:
+            current_app.logger.warning("Content query fallback triggered: %s", error)
+            raise
 
 
 def fetch_navigation():
@@ -67,7 +81,7 @@ def fetch_page(slug: str) -> dict[str, Any] | None:
         cursor = dict_cursor()
         cursor.execute(
             """
-            SELECT id, slug, title, body_markdown, status, sort_order, created_at, updated_at
+            SELECT id, slug, title, body_markdown, body_html, status, sort_order, created_at, updated_at
             FROM pages
             WHERE slug = %s AND status = 'published'
             LIMIT 1
@@ -77,7 +91,7 @@ def fetch_page(slug: str) -> dict[str, Any] | None:
         row = cursor.fetchone()
         cursor.close()
         if row:
-            row["body_html"] = render_markdown(row["body_markdown"])
+            row["body_html"] = get_cached_html(row, "body_markdown")
         return row
 
     return _safe_query(None, _run)
@@ -109,7 +123,7 @@ def fetch_post(slug: str):
         cursor = dict_cursor()
         cursor.execute(
             """
-            SELECT id, slug, title, excerpt, body_markdown, status, published_at, created_at, updated_at
+            SELECT id, slug, title, excerpt, body_markdown, body_html, status, published_at, created_at, updated_at
             FROM posts
             WHERE slug = %s AND status = 'published'
             LIMIT 1
@@ -119,7 +133,7 @@ def fetch_post(slug: str):
         row = cursor.fetchone()
         cursor.close()
         if row:
-            row["body_html"] = render_markdown(row["body_markdown"])
+            row["body_html"] = get_cached_html(row, "body_markdown")
         return row
 
     return _safe_query(None, _run)
@@ -149,7 +163,7 @@ def fetch_experiment(slug: str):
         cursor = dict_cursor()
         cursor.execute(
             """
-            SELECT id, slug, title, summary, body_markdown, demo_path, source_path, status, featured, created_at, updated_at
+            SELECT id, slug, title, summary, body_markdown, body_html, demo_path, source_path, status, featured, created_at, updated_at
             FROM experiments
             WHERE slug = %s AND status = 'published'
             LIMIT 1
@@ -159,7 +173,7 @@ def fetch_experiment(slug: str):
         row = cursor.fetchone()
         cursor.close()
         if row:
-            row["body_html"] = render_markdown(row["body_markdown"])
+            row["body_html"] = get_cached_html(row, "body_markdown")
         return row
 
     return _safe_query(None, _run)
@@ -204,14 +218,20 @@ def fetch_admin_content(content_type: str):
     if content_type not in {"page", "post", "experiment"}:
         raise ValueError(f"Unsupported content type: {content_type}")
 
-    table = {
+    table_map = {
         "page": "pages",
         "post": "posts",
         "experiment": "experiments",
-    }[content_type]
+    }
+    table = table_map[content_type]
+
+    allowed_tables = {"pages", "posts", "experiments"}
+    if table not in allowed_tables:
+        raise ValueError(f"Invalid table: {table}")
+
     def _run():
         cursor = dict_cursor()
-        cursor.execute(f"SELECT * FROM {table} ORDER BY updated_at DESC, id DESC")
+        cursor.execute("SELECT * FROM `%s` ORDER BY updated_at DESC, id DESC" % table)
         rows = cursor.fetchall()
         cursor.close()
         return rows
@@ -220,22 +240,28 @@ def fetch_admin_content(content_type: str):
 
 
 def upsert_content(content_type: str, payload: dict[str, Any]) -> None:
+    body_html = render_markdown(payload.get("body_markdown", ""))
+
     if content_type == "page":
-        columns = ["slug", "title", "body_markdown", "status", "sort_order"]
+        columns = ["slug", "title", "body_markdown", "body_html", "status", "sort_order"]
         table = "pages"
         update_clause = """
             title = VALUES(title),
             body_markdown = VALUES(body_markdown),
+            body_html = VALUES(body_html),
             status = VALUES(status),
             sort_order = VALUES(sort_order),
             updated_at = CURRENT_TIMESTAMP
         """
+        values_dict = {col: payload.get(col) for col in ["slug", "title", "body_markdown", "status", "sort_order"]}
+        values_dict["body_html"] = body_html
     elif content_type == "post":
         columns = [
             "slug",
             "title",
             "excerpt",
             "body_markdown",
+            "body_html",
             "status",
             "published_at",
         ]
@@ -244,16 +270,20 @@ def upsert_content(content_type: str, payload: dict[str, Any]) -> None:
             title = VALUES(title),
             excerpt = VALUES(excerpt),
             body_markdown = VALUES(body_markdown),
+            body_html = VALUES(body_html),
             status = VALUES(status),
             published_at = VALUES(published_at),
             updated_at = CURRENT_TIMESTAMP
         """
+        values_dict = {col: payload.get(col) for col in ["slug", "title", "excerpt", "body_markdown", "status", "published_at"]}
+        values_dict["body_html"] = body_html
     elif content_type == "experiment":
         columns = [
             "slug",
             "title",
             "summary",
             "body_markdown",
+            "body_html",
             "demo_path",
             "source_path",
             "status",
@@ -264,18 +294,21 @@ def upsert_content(content_type: str, payload: dict[str, Any]) -> None:
             title = VALUES(title),
             summary = VALUES(summary),
             body_markdown = VALUES(body_markdown),
+            body_html = VALUES(body_html),
             demo_path = VALUES(demo_path),
             source_path = VALUES(source_path),
             status = VALUES(status),
             featured = VALUES(featured),
             updated_at = CURRENT_TIMESTAMP
         """
+        values_dict = {col: payload.get(col) for col in ["slug", "title", "summary", "body_markdown", "demo_path", "source_path", "status", "featured"]}
+        values_dict["body_html"] = body_html
     else:
         raise ValueError(f"Unsupported content type: {content_type}")
 
     placeholders = ", ".join(["%s"] * len(columns))
     column_list = ", ".join(columns)
-    values = [payload.get(column) for column in columns]
+    values = [values_dict.get(column) for column in columns]
 
     cursor = get_db().cursor()
     cursor.execute(

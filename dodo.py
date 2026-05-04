@@ -70,9 +70,28 @@ def task_createdotenv():
     }
 
 def task_webappreload():
-    """pythonanywhere reload cmd"""
+    """pythonanywhere reload cmd with environment variables"""
+    def reload_with_env(targets):
+        import subprocess
+        import os
+        from dotenv import load_dotenv
+
+        # Load environment variables from .env file
+        load_dotenv()
+
+        # Build the reload command with env vars
+        cmd = ["pa", "webapp", "reload"]
+
+        # Add domain/user from env if available
+        user = os.getenv("MYSQL_USER")
+        if user:
+            webapp_name = f"{user}.pythonanywhere.com"
+            cmd.append(webapp_name)
+
+        return subprocess.run(cmd, check=True)
+
     return {
-        "actions": ["pa webapp reload"],
+        "actions": [reload_with_env],
         "file_dep": [".env"],
         "uptodate": ["false"],
         "verbosity": 2,

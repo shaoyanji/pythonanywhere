@@ -31,44 +31,58 @@ def _apply_sql_file(cursor, path: Path):
         pass
 
 
+def _migrate_messages_to_prompt_runs(cursor):
+    """Extract legacy migration logic to dedicated function."""
+    if _messages_table_exists(cursor):
+        cursor.execute(
+            """
+            INSERT INTO prompt_runs (title, input_text, output_text, summary, kind, created_at)
+            SELECT
+                COALESCE(NULLIF(title, ''), CONCAT('message-', id)),
+                content,
+                aicontent,
+                summary,
+                'legacy-message',
+                COALESCE(created_at, CURRENT_TIMESTAMP)
+            FROM messages
+            WHERE NOT EXISTS (
+                SELECT 1
+                FROM prompt_runs
+                WHERE prompt_runs.title = COALESCE(NULLIF(messages.title, ''), CONCAT('message-', messages.id))
+                  AND prompt_runs.input_text <=> messages.content
+                  AND prompt_runs.output_text <=> messages.aicontent
+            )
+            """
+        )
+
+
 def migrate_database(connection=None, sql_dir: Path | None = None) -> None:
     connection = connection or get_db()
     cursor = connection.cursor()
     applied = _migration_history(cursor)
     sql_dir = sql_dir or current_app.config["MIGRATIONS_DIR"]
 
-    for path in sorted(sql_dir.glob("*.sql")):
-        version = path.name
-        if version in applied:
-            continue
-        _apply_sql_file(cursor, path)
+    try:
+        for path in sorted(sql_dir.glob("*.sql")):
+            version = path.name
+            if version in applied:
+                continue
+            _apply_sql_file(cursor, path)
 
-        if version == "0002_migrate_messages_to_prompt_runs.sql" and _messages_table_exists(cursor):
+            if version == "0002_migrate_messages_to_prompt_runs.sql":
+                _migrate_messages_to_prompt_runs(cursor)
+
             cursor.execute(
-                """
-                INSERT INTO prompt_runs (title, input_text, output_text, summary, kind, created_at)
-                SELECT
-                    COALESCE(NULLIF(title, ''), CONCAT('message-', id)),
-                    content,
-                    aicontent,
-                    summary,
-                    'legacy-message',
-                    COALESCE(created_at, CURRENT_TIMESTAMP)
-                FROM messages
-                WHERE NOT EXISTS (
-                    SELECT 1
-                    FROM prompt_runs
-                    WHERE prompt_runs.title = COALESCE(NULLIF(messages.title, ''), CONCAT('message-', messages.id))
-                      AND prompt_runs.input_text <=> messages.content
-                      AND prompt_runs.output_text <=> messages.aicontent
-                )
-                """
+                "INSERT INTO schema_migrations (version) VALUES (%s)",
+                (version,),
             )
+            connection.commit()
 
-        cursor.execute(
-            "INSERT INTO schema_migrations (version) VALUES (%s)",
-            (version,),
-        )
-        connection.commit()
-
-    cursor.close()
+        cursor.close()
+    except Exception as e:
+        connection.rollback()
+        current_app.logger.error("Migration failed: %s", e)
+        raise
+    finally:
+        if cursor:
+            cursor.close()

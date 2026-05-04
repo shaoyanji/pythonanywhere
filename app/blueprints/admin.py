@@ -10,6 +10,12 @@ from app.services.content import (
 from app.services.deploy import run_deploy_tasks
 
 
+def log_admin_action(action: str, details: str = ""):
+    """Simple admin audit log - writes to app logger."""
+    from flask import current_app
+    current_app.logger.info("ADMIN ACTION: %s %s", action, details)
+
+
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 
@@ -41,6 +47,7 @@ def admin_content():
             "featured": 1 if request.form.get("featured") == "on" else 0,
         }
         upsert_content(content_type, payload)
+        log_admin_action("content_upsert", f"type={content_type}, slug={payload['slug']}")
         flash(f"{content_type.title()} saved.", "success")
         return redirect(url_for("admin.admin_content", type=content_type))
 
@@ -62,5 +69,6 @@ def admin_prompts():
 def admin_deploy():
     results = None
     if request.method == "POST":
+        log_admin_action("deploy", "Triggered deployment")
         results = run_deploy_tasks()
     return render_template("pages/admin/deploy.html", results=results)
