@@ -70,7 +70,7 @@ def task_createdotenv():
     }
 
 def task_webappreload():
-    """pythonanywhere reload cmd with environment variables"""
+    """pythonanywhere reload cmd - decrypts .env.age if needed"""
     def reload_with_env(targets):
         import subprocess
         import os
@@ -88,16 +88,8 @@ def task_webappreload():
         # Load environment variables from .env file
         load_dotenv()
 
-        # Build the reload command with env vars
-        cmd = ["pa", "webapp", "reload"]
-
-        # Add domain/user from env if available
-        user = os.getenv("MYSQL_USER")
-        if user:
-            webapp_name = f"{user}.pythonanywhere.com"
-            cmd.append(webapp_name)
-
-        return subprocess.run(cmd, check=True)
+        # Run reload - pa automatically knows which webapp from the environment
+        return subprocess.run(["pa", "webapp", "reload"], check=True)
 
     return {
         "actions": [reload_with_env],
