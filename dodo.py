@@ -76,6 +76,15 @@ def task_webappreload():
         import os
         from dotenv import load_dotenv
 
+        # Ensure .env exists by decrypting .env.age if needed
+        if not os.path.exists(".env") and os.path.exists(".env.age"):
+            subprocess.run(
+                ["age", "-d", "-i", os.path.expanduser("~/.ssh/id_ed25519"), ".env.age"],
+                stdout=open(".env", "w"),
+                check=True
+            )
+            print("Decrypted .env.age to .env")
+
         # Load environment variables from .env file
         load_dotenv()
 
@@ -92,7 +101,7 @@ def task_webappreload():
 
     return {
         "actions": [reload_with_env],
-        "file_dep": [".env"],
+        "file_dep": [".env.age"],
         "uptodate": ["false"],
         "verbosity": 2,
     }

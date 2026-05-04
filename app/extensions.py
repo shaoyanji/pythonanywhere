@@ -5,6 +5,7 @@ from pathlib import Path
 
 import click
 import mysql.connector
+from mysql.connector import pooling
 from dotenv import load_dotenv
 from flask import current_app, g
 
@@ -16,7 +17,7 @@ _pool = None
 def _get_pool():
     global _pool
     if _pool is None:
-        _pool = mysql.connector.pooling.MySQLConnectionPool(
+        _pool = pooling.MySQLConnectionPool(
             pool_name="flask_app_pool",
             pool_size=5,
             pool_reset_session=True,
@@ -41,10 +42,10 @@ def init_app(app):
 
     @app.before_request
     def csrf_protect():
+        from flask import request, abort
         if request.method == "POST":
             token = request.form.get("csrf_token")
             if not token or token != app.config.get("CSRF_TOKEN"):
-                from flask import abort
                 abort(403)
 
     @app.context_processor
