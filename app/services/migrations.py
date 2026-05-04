@@ -27,7 +27,10 @@ def _migration_history(cursor) -> set[str]:
 
 def _apply_sql_file(cursor, path: Path):
     sql = path.read_text()
-    for _ in cursor.execute(sql, multi=True):
+    try:
+        for _ in cursor.execute(sql, multi=True):
+            pass
+    except StopIteration:
         pass
 
 
