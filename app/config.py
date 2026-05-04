@@ -36,26 +36,21 @@ def _compute_db_host() -> str | None:
 
 
 class Config:
-    SECRET_KEY = _strip_quotes(os.getenv("SECRET_KEY", "dev-secret-key-change-me"))
-    APP_NAME = _strip_quotes(os.getenv("APP_NAME", "Shaoyan Ji Lab"))
-    APP_TAGLINE = _strip_quotes(
-        os.getenv(
-            "APP_TAGLINE",
-            "Personal notes, experiments, and operational tools in one restrained Flask site.",
-        )
-    )
-    MYSQL_USER = _strip_quotes(os.getenv("MYSQL_USER"))
-    MYSQL_PASSWORD = _strip_quotes(os.getenv("MYSQL_PASSWORD"))
-    MYSQL_DB = _compute_db_name()
-    MYSQL_HOST = _compute_db_host()
-    MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
-    MYSQL_SSL_DISABLED = os.getenv("MYSQL_SSL_DISABLED", "1") == "1"
-    ADMIN_USERNAME = _strip_quotes(os.getenv("ADMIN_USERNAME", "admin"))
-    ADMIN_PASSWORD_HASH = _strip_quotes(os.getenv("ADMIN_PASSWORD_HASH"))
-    ADMIN_TOOLS_ENABLED = os.getenv("ADMIN_TOOLS_ENABLED", "0") == "1"
-    ENABLE_ADMIN_DEPLOY = os.getenv("ENABLE_ADMIN_DEPLOY", "0") == "1"
-    DEPLOY_RELOAD_COMMAND = os.getenv("DEPLOY_RELOAD_COMMAND", "pa webapp reload")
-    GIT_PULL_COMMAND = os.getenv("GIT_PULL_COMMAND")
+    SECRET_KEY = None
+    APP_NAME = None
+    APP_TAGLINE = None
+    MYSQL_USER = None
+    MYSQL_PASSWORD = None
+    MYSQL_DB = None
+    MYSQL_HOST = None
+    MYSQL_PORT = 3306
+    MYSQL_SSL_DISABLED = True
+    ADMIN_USERNAME = "admin"
+    ADMIN_PASSWORD_HASH = None
+    ADMIN_TOOLS_ENABLED = False
+    ENABLE_ADMIN_DEPLOY = False
+    DEPLOY_RELOAD_COMMAND = "pa webapp reload"
+    GIT_PULL_COMMAND = None
     CONTENT_HTML_TAGS = [
         "a",
         "blockquote",
@@ -76,7 +71,32 @@ class Config:
         "a": ["href", "title", "rel", "target"],
     }
     MIGRATIONS_DIR = BASE_DIR / "migrations" / "sql"
-    FLASK_DEBUG = os.getenv("FLASK_DEBUG", "0") == "1"
+    FLASK_DEBUG = False
+
+    @classmethod
+    def reload(cls):
+        """Reload config from environment (call after load_dotenv())."""
+        cls.SECRET_KEY = _strip_quotes(os.getenv("SECRET_KEY", "dev-secret-key-change-me"))
+        cls.APP_NAME = _strip_quotes(os.getenv("APP_NAME", "Shaoyan Ji Lab"))
+        cls.APP_TAGLINE = _strip_quotes(
+            os.getenv(
+                "APP_TAGLINE",
+                "Personal notes, experiments, and operational tools in one restrained Flask site.",
+            )
+        )
+        cls.MYSQL_USER = _strip_quotes(os.getenv("MYSQL_USER"))
+        cls.MYSQL_PASSWORD = _strip_quotes(os.getenv("MYSQL_PASSWORD"))
+        cls.MYSQL_DB = _compute_db_name()
+        cls.MYSQL_HOST = _compute_db_host()
+        cls.MYSQL_PORT = int(os.getenv("MYSQL_PORT", "3306"))
+        cls.MYSQL_SSL_DISABLED = os.getenv("MYSQL_SSL_DISABLED", "1") == "1"
+        cls.ADMIN_USERNAME = _strip_quotes(os.getenv("ADMIN_USERNAME", "admin"))
+        cls.ADMIN_PASSWORD_HASH = _strip_quotes(os.getenv("ADMIN_PASSWORD_HASH"))
+        cls.ADMIN_TOOLS_ENABLED = os.getenv("ADMIN_TOOLS_ENABLED", "0") == "1"
+        cls.ENABLE_ADMIN_DEPLOY = os.getenv("ENABLE_ADMIN_DEPLOY", "0") == "1"
+        cls.DEPLOY_RELOAD_COMMAND = os.getenv("DEPLOY_RELOAD_COMMAND", "pa webapp reload")
+        cls.GIT_PULL_COMMAND = os.getenv("GIT_PULL_COMMAND")
+        cls.FLASK_DEBUG = os.getenv("FLASK_DEBUG", "0") == "1"
 
     @classmethod
     def validate_production(cls):

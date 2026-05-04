@@ -15,6 +15,9 @@ def create_app(config_object=None) -> Flask:
     if config_object is None:
         config_object = get_config()
 
+    # Reload config from environment
+    Config.reload()
+
     app = Flask(__name__)
     if isinstance(config_object, dict):
         app.config.from_object(Config)
