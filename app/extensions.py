@@ -17,6 +17,12 @@ _pool = None
 def _get_pool():
     global _pool
     if _pool is None:
+        # Validate config before creating pool
+        if not all([Config.MYSQL_HOST, Config.MYSQL_USER, Config.MYSQL_PASSWORD]):
+            raise ValueError(
+                "MySQL configuration incomplete. "
+                "Ensure MYSQL_HOST, MYSQL_USER, and MYSQL_PASSWORD are set."
+            )
         _pool = pooling.MySQLConnectionPool(
             pool_name="flask_app_pool",
             pool_size=5,

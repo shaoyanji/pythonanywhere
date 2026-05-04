@@ -27,6 +27,21 @@ def serve(host: str = "127.0.0.1", port: int = 5000, debug: bool = None):
 
 @cli.command("db-upgrade")
 def db_upgrade():
+    """Apply database migrations (auto-decrypts .env.age if needed)."""
+    import os
+    import subprocess
+    from dotenv import load_dotenv
+
+    # Auto-decrypt .env.age if .env doesn't exist
+    if not os.path.exists(".env") and os.path.exists(".env.age"):
+        subprocess.run(
+            ["age", "-d", "-i", os.path.expanduser("~/.ssh/id_ed25519"), ".env.age"],
+            stdout=open(".env", "w"),
+            check=True
+        )
+        print("Decrypted .env.age to .env")
+
+    load_dotenv()
     app = create_app()
     with app.app_context():
         migrate_database()
