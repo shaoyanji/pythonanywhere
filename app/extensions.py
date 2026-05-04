@@ -27,7 +27,6 @@ def _get_pool():
             password=Config.MYSQL_PASSWORD,
             database=Config.MYSQL_DB,
             autocommit=False,
-            use_pure=True,
         )
     return _pool
 

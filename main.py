@@ -33,6 +33,13 @@ def db_upgrade():
     print("Database migrations applied.")
 
 
+@cli.command("generate-password-hash")
+def generate_password_hash():
+    """Generate a password hash for ADMIN_PASSWORD_HASH."""
+    from app.services.auth import init_admin_password
+    init_admin_password()
+
+
 def _get_app_context():
     """Create app and return app context."""
     app = create_app()

@@ -89,7 +89,8 @@ def task_webappreload():
         load_dotenv()
 
         # Run reload - pa automatically knows which webapp from the environment
-        return subprocess.run(["pa", "webapp", "reload"], check=True)
+        subprocess.run(["pa", "webapp", "reload"], check=True)
+        return True
 
     return {
         "actions": [reload_with_env],
