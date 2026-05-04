@@ -30,16 +30,21 @@ def db_upgrade():
     """Apply database migrations (auto-decrypts .env.age if needed)."""
     import os
     import subprocess
-    from dotenv import load_dotenv
+    from dotenv import load_dotenv()
 
     # Auto-decrypt .env.age if .env doesn't exist
     if not os.path.exists(".env") and os.path.exists(".env.age"):
-        subprocess.run(
-            ["age", "-d", "-i", os.path.expanduser("~/.ssh/id_ed25519"), ".env.age"],
-            stdout=open(".env", "w"),
-            check=True
-        )
-        print("Decrypted .env.age to .env")
+        try:
+            subprocess.run(
+                ["age", "-d", "-i", os.path.expanduser("~/.ssh/id_ed25519"), ".env.age"],
+                stdout=open(".env", "w"),
+                check=True
+            )
+            print("Decrypted .env.age to .env")
+        except FileNotFoundError:
+            print("Warning: 'age' command not found. Ensure .env exists or install age.")
+        except Exception as e:
+            print(f"Warning: Failed to decrypt .env.age: {e}")
 
     load_dotenv()
     app = create_app()
