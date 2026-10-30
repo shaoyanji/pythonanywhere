@@ -116,6 +116,18 @@ def _measure(text: str, size: float, bold: bool = False) -> float:
     return sum(_char_width(character, size, bold) for character in text)
 
 
+def _pt(size: float) -> int:
+    """pdfcpu's text ``font.size`` is an integer field.
+
+    0.11.1 rejects a float with ``json: cannot unmarshal number 16.0 into Go
+    struct field FormFont.Pages.Content.text.Font.Size of type int``, and the
+    build then fails after the content JSON has already been written. Rounding
+    once, here, keeps measurement and output on the same number instead of
+    serialising a size the renderer never used.
+    """
+    return int(round(size))
+
+
 def wrap(text: str, width: float, size: float, bold: bool = False) -> list[str]:
     """Greedy word wrap against the estimated width. Words longer than the line
     are hard-split rather than allowed to overflow the margin."""
@@ -167,11 +179,12 @@ class _Canvas:
         line = {
             "value": value,
             "position": [round(x, 2), round(self.y if y is None else y, 2)],
-            "font": {"name": "Helvetica-Bold" if bold else "Helvetica", "size": size},
+            "font": {"name": "Helvetica-Bold" if bold else "Helvetica", "size": _pt(size)},
         }
         self.page.append(line)
 
     def line(self, value: str, size: float, bold: bool = False, x: float = MARGIN_X, indent: float = 0.0) -> None:
+        size = _pt(size)
         for index, chunk in enumerate(wrap(value, TEXT_WIDTH - indent, size, bold)):
             self.ensure(size * LEADING)
             self.text(chunk, x + indent, size, bold=bold)
@@ -183,21 +196,23 @@ class _Canvas:
         # textbox container and ``create`` rejects it without a font definition
         # ("content: pools: textbox missing font definition"). Rather than guess
         # at a schema that may change again, headings separate by weight and case.
-        self.ensure(SIZE_HEADING * 3)
+        heading = _pt(SIZE_HEADING)
+        self.ensure(heading * 3)
         self.y -= 4
-        self.text(value.upper(), MARGIN_X, SIZE_HEADING, bold=True)
-        self.y -= SIZE_HEADING * LEADING
+        self.text(value.upper(), MARGIN_X, heading, bold=True)
+        self.y -= heading * LEADING
 
     def bullet(self, value: str) -> None:
         indent = 11.0
-        chunks = wrap(value, TEXT_WIDTH - indent, SIZE_BODY)
+        body = _pt(SIZE_BODY)
+        chunks = wrap(value, TEXT_WIDTH - indent, body)
         for index, chunk in enumerate(chunks):
-            self.ensure(SIZE_BODY * LEADING)
+            self.ensure(body * LEADING)
             if index == 0:
-                self.text("\u2022", MARGIN_X + 2, SIZE_BODY)
-            self.text(chunk, MARGIN_X + indent, SIZE_BODY)
-            self.y -= SIZE_BODY * LEADING
-        self.y -= SIZE_BODY * 0.22
+                self.text("\u2022", MARGIN_X + 2, body)
+            self.text(chunk, MARGIN_X + indent, body)
+            self.y -= body * LEADING
+        self.y -= body * 0.22
 
     def finish(self) -> list[list[dict]]:
         if self.page:

@@ -231,6 +231,27 @@ class ApprovalGateTests(ResumeTestCase):
 
 
 class PdfTests(ResumeTestCase):
+    def test_content_json_uses_integer_font_sizes(self):
+        """pdfcpu 0.11.1 types ``font.size`` as an int.
+
+        A float is rejected at ``create`` with ``json: cannot unmarshal number
+        16.0 into Go struct field ... Font.Size of type int``, which is what the
+        tester saw: the content JSON is written, then the build fails and no PDF
+        or status record appears. The model is asserted here rather than only
+        through a build, so the check runs on a host without the binary.
+        """
+        base = json.loads(BASE_RESUME.read_text())
+        with self.app.app_context():
+            content = pdf.build_content(base)
+        sizes = [
+            element["font"]["size"]
+            for page in content["pages"].values()
+            for element in page["content"]["text"]
+        ]
+        self.assertTrue(sizes, "the resume should produce text elements")
+        for size in sizes:
+            self.assertIsInstance(size, int, f"font.size {size!r} must be an int for pdfcpu")
+
     @unittest.skipUnless(pdfcpu_available(), "pdfcpu not installed")
     def test_build_produces_a_validated_pdf_and_leaves_the_base_alone(self):
         base_digest = digest_of(BASE_RESUME)
