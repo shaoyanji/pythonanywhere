@@ -1,0 +1,76 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Resume</p>
+    <h1>Variants</h1>
+    <p class="lede">
+      The base resume is read only. A variant is written only after an
+      <code>approved.json</code> exists for it, so no step can skip approval.
+    </p>
+    <p class="muted">base: <code>{{ base_path }}</code></p>
+  </section>
+
+  <section class="panel stack">
+    <h2>New variant</h2>
+    <form class="admin-form" method="post" action="{{ url_for('resume.create_variant') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Name (lowercase, digits, dashes)
+        <input name="name" required pattern="[a-z0-9][a-z0-9-]{0,39}" placeholder="acme">
+      </label>
+      <button type="submit">Create</button>
+    </form>
+  </section>
+
+  <section class="panel stack">
+    <h2>Existing variants</h2>
+    {% if variants %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Variant</th>
+              <th>Resume</th>
+              <th>Approved</th>
+              <th>Last build</th>
+              <th>Validate</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for variant in variants %}
+              <tr>
+                <td>{{ variant.name }}</td>
+                <td>{{ "yes" if variant.has_resume else "base" }}</td>
+                <td>{{ "yes" if variant.has_approved else "no" }}</td>
+                <td>{{ variant.last_build or "never" }}</td>
+                <td>{{ variant.last_validate or "-" }}</td>
+                <td class="row-actions">
+                  <a href="{{ url_for('resume.jd', variant=variant.name) }}">JD</a>
+                  <a href="{{ url_for('resume.review', variant=variant.name) }}">Review</a>
+                  <a href="{{ url_for('resume.editor', variant=variant.name) }}">Edit</a>
+                  <a href="{{ url_for('resume.diff', variant=variant.name) }}">Diff</a>
+                  {% if variant.pdf_path %}
+                    <a href="{{ url_for('resume.download_pdf', variant=variant.name) }}">PDF</a>
+                  {% endif %}
+                  <form method="post" action="{{ url_for('resume.build', variant=variant.name) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="link-button">Build</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">No variants yet. Create one above, then paste a job description.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel stack">
+    <h2>Needle</h2>
+    <p class="lede">Five commands, no more: {{ tools | join(", ") }}.</p>
+    <a href="{{ url_for('resume.needle_page') }}">Open the command bar</a>
+  </section>
+{% endblock %}

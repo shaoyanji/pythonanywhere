@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "name": "Shaoyan Ji",
+  "title": "Infrastructure & Platform Engineer",
+  "contact": {
+    "email": "you@example.com",
+    "site": "jisifu.pythonanywhere.com",
+    "location": "Remote"
+  },
+  "summary": "Infrastructure engineer who builds small, auditable systems: declarative fleets, thin web services, and reproducible build pipelines. Prefers a boring solution that can be checked over a clever one that cannot.",
+  "sections": {
+    "skills": [
+      {"name": "Go", "detail": "Services and CLIs, standard library first"},
+      {"name": "Kubernetes", "detail": "Deployments, ingress, Helm charts, cluster upgrades"},
+      {"name": "NixOS", "detail": "Flake-based host fleets, module systems, reproducible images"},
+      {"name": "telemetry", "detail": "Prometheus metrics, structured logs, alert routing"},
+      {"name": "Python", "detail": "Flask services, CLI tooling, data wrangling"},
+      {"name": "MySQL", "detail": "Schema design, migrations, query tuning"},
+      {"name": "Linux", "detail": "systemd units, networking, storage, hardening"},
+      {"name": "CI/CD", "detail": "GitHub Actions, cache warming, release gates"}
+    ],
+    "experience": [
+      {
+        "company": "Independent",
+        "role": "Infrastructure Engineer",
+        "period": "2023 - present",
+        "bullets": [
+          "Operate a fleet of NixOS hosts declared as one flake, with inventory-driven builds and per-host deploy gates.",
+          "Wrote Go services for device inventory and health, shipping as static binaries to constrained hardware.",
+          "Replaced hand-built release steps with a reproducible pipeline, cutting deploy time from hours to minutes.",
+          "Built telemetry collection on Prometheus and alert routing, so a failing host pages before a user notices.",
+          "Ran Kubernetes workloads for internal tooling, including ingress, sealed secrets and rolling upgrades."
+        ]
+      },
+      {
+        "company": "Previous employer",
+        "role": "Software Engineer",
+        "period": "2020 - 2023",
+        "bullets": [
+          "Maintained a Flask publishing service on MySQL, including schema migrations and markdown rendering.",
+          "Automated environment provisioning, removing a manual checklist from every new deployment.",
+          "Introduced integration tests around the deploy path after repeated silent failures."
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "name": "nixconfig",
+        "summary": "Personal fleet of NixOS, nix-darwin and Home Manager hosts, declared once and deployed per host."
+      },
+      {
+        "name": "Shaoyan Ji Lab",
+        "summary": "Thin Flask CMS with a MySQL content model, markdown authoring and an admin surface behind basic auth."
+      }
+    ],
+    "education": [
+      {
+        "school": "University",
+        "degree": "BSc Computer Science",
+        "period": "2016 - 2020"
+      }
+    ]
+  }
+}

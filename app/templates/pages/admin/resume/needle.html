@@ -1,0 +1,54 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Resume / Needle</p>
+    <h1>Command bar</h1>
+    <p class="lede">
+      A router, not an analyst. Five names, nothing else — an unknown name is refused
+      before any process starts.
+    </p>
+  </section>
+
+  <section class="panel stack">
+    <form class="admin-form" method="post" action="{{ url_for('resume.needle_run') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Command
+        <input name="command" value="{{ command or '' }}" placeholder="show_tasks" required>
+      </label>
+      <p class="muted">Parameters are <code>KEY=value</code> tokens: PYANY_VARIANT, PYANY_JD, PYANY_JD_FILE, PYANY_PORT.</p>
+      <button type="submit">Run</button>
+    </form>
+  </section>
+
+  {% if result %}
+    <section class="panel stack">
+      <h2>{{ "ran" if result.executed else "refused" }}: {{ result.name or "(no name)" }}</h2>
+      {% if not result.ok and result.error %}
+        <pre class="jd-text">{{ result.error }}</pre>
+      {% endif %}
+      {% if result.output %}
+        <pre class="jd-text">{{ result.output }}</pre>
+      {% endif %}
+      <p class="muted">known: {{ result.known | join(", ") }}</p>
+    </section>
+  {% endif %}
+
+  <section class="panel stack">
+    <h2>Catalogue</h2>
+    {% for tool in tools %}
+      <details class="tool">
+        <summary><code>{{ tool.name }}</code> — {{ tool.desc }}</summary>
+        <dl class="tool-meta">
+          <dt>summary</dt><dd>{{ tool.summary }}</dd>
+          <dt>use when</dt><dd>{{ tool.when_to_use }}</dd>
+          <dt>not when</dt><dd>{{ tool.when_not_to_use }}</dd>
+          <dt>inputs</dt><dd>{{ tool.inputs | join(", ") if tool.inputs else "—" }}</dd>
+          <dt>outputs</dt><dd>{{ tool.outputs | join(", ") }}</dd>
+          <dt>preconditions</dt><dd>{{ tool.preconditions | join(", ") }}</dd>
+          <dt>example</dt><dd><code>{{ tool.example }}</code></dd>
+        </dl>
+      </details>
+    {% endfor %}
+  </section>
+{% endblock %}

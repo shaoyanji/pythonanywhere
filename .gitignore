@@ -45,3 +45,6 @@ app/static/*.webmanifest
 app/static/fonts
 .doit*
 **/*.swp
+
+# resume editor runtime data: variant resumes, proposals, built PDFs
+variants/

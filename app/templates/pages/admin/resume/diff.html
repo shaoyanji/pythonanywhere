@@ -1,0 +1,51 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Resume / {{ variant }}</p>
+    <h1>Diff against base</h1>
+    <p class="lede">Field-level differences. The base is never modified, so every row here is a variant-only decision.</p>
+    <p class="muted">
+      last build: {{ status.built_at or "never" }} ·
+      validate: {{ status.validate or "-" }} ·
+      {{ status.size_bytes or 0 }} bytes
+    </p>
+  </section>
+
+  <section class="panel stack">
+    <h2>{{ rows | length }} change(s)</h2>
+    {% if rows %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Field</th><th>Base</th><th>Variant</th></tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+              <tr>
+                <td><code>{{ row.path }}</code></td>
+                <td>{{ row.base if row.base is not none else "—" }}</td>
+                <td>{{ row.variant if row.variant is not none else "—" }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">Identical to the base.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel stack">
+    <div class="row-actions">
+      <form method="post" action="{{ url_for('resume.build', variant=variant) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit">Build PDF</button>
+      </form>
+      {% if has_pdf %}
+        <a href="{{ url_for('resume.download_pdf', variant=variant) }}">Open PDF</a>
+      {% endif %}
+      <a href="{{ url_for('resume.overview') }}">All variants</a>
+    </div>
+  </section>
+{% endblock %}

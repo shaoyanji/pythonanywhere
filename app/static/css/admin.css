@@ -125,3 +125,25 @@
     border-bottom: 1px solid var(--border);
   }
 }
+
+/* Resume editor (branch resume-editor-pa) */
+.muted { color: #6b7280; font-size: 0.86rem; }
+.row-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.row-actions form { display: inline; margin: 0; }
+.link-button {
+  background: none; border: 0; padding: 0; color: inherit;
+  text-decoration: underline; cursor: pointer; font: inherit;
+}
+.evidence { max-width: 26rem; color: #4b5563; }
+.jd-text {
+  white-space: pre-wrap; word-break: break-word; background: #f8f9fb;
+  border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.8rem;
+  font-size: 0.86rem; max-height: 22rem; overflow: auto;
+}
+.plain-list { margin: 0; padding-left: 1.1rem; }
+.plain-list li { margin-bottom: 0.35rem; }
+.tool { border-bottom: 1px solid #e5e7eb; padding: 0.5rem 0; }
+.tool summary { cursor: pointer; }
+.tool-meta { display: grid; grid-template-columns: 9rem 1fr; gap: 0.2rem 0.8rem; margin: 0.6rem 0 0; font-size: 0.86rem; }
+.tool-meta dt { color: #6b7280; }
+.tool-meta dd { margin: 0; }

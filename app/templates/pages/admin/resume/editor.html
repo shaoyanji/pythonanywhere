@@ -1,0 +1,40 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Resume / {{ variant }}</p>
+    <h1>Edit variant</h1>
+    {% if uses_base %}
+      <p class="muted">This variant has no own resume yet: the form below shows the base document.</p>
+    {% endif %}
+    {% if not has_approval %}
+      <p class="flash flash-error">
+        No <code>approved.json</code> for this variant, so saving is refused. Analyze a job
+        description and approve at least one proposal first.
+      </p>
+    {% endif %}
+  </section>
+
+  <section class="panel stack">
+    <form class="admin-form" method="post" action="{{ url_for('resume.save_editor', variant=variant) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Name <input name="name" value="{{ resume.name }}"></label>
+      <label>Title <input name="title" value="{{ resume.title }}"></label>
+      <label>Email <input name="contact_email" value="{{ resume.contact.email if resume.contact else '' }}"></label>
+      <label>Site <input name="contact_site" value="{{ resume.contact.site if resume.contact else '' }}"></label>
+      <label>Location <input name="contact_location" value="{{ resume.contact.location if resume.contact else '' }}"></label>
+      <label>Summary <textarea name="summary" rows="5">{{ resume.summary }}</textarea></label>
+      <label>Skills — one per line, <code>Name: detail</code>
+        <textarea name="skills" rows="10">{{ skills_text }}</textarea>
+      </label>
+      <button type="submit">Save variant</button>
+    </form>
+  </section>
+
+  <section class="panel stack">
+    <h2>Next</h2>
+    <p><a href="{{ url_for('resume.review', variant=variant) }}">Review proposals</a> ·
+       <a href="{{ url_for('resume.diff', variant=variant) }}">Diff against base</a> ·
+       <a href="{{ url_for('resume.overview') }}">All variants</a></p>
+  </section>
+{% endblock %}

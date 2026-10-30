@@ -71,6 +71,11 @@ class Config:
         "a": ["href", "title", "rel", "target"],
     }
     MIGRATIONS_DIR = BASE_DIR / "migrations" / "sql"
+    # Resume editor: the base document is read-only, variants are written under
+    # RESUME_VARIANTS_DIR, and PDFCPU_BIN overrides the auto-detected binary.
+    RESUME_BASE_PATH = BASE_DIR / "resume" / "base.json"
+    RESUME_VARIANTS_DIR = BASE_DIR / "variants"
+    PDFCPU_BIN = None
     FLASK_DEBUG = False
 
     @classmethod

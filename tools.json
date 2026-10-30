@@ -1,0 +1,100 @@
+{
+  "generated_from": "dodo.py",
+  "generated_by": "app/services/resume/tooling.py",
+  "count": 5,
+  "tools": [
+    {
+      "name": "analyze_job",
+      "command": "doit analyze_job",
+      "desc": "Score a job description against the resume and write proposals",
+      "summary": "Deterministic match: synonym groups, stemming, TF-IDF cosine at 0.15. Writes variants/<v>/proposals.json with resume_key, evidence, score and a null suggested_change, plus the gaps that must not be invented.",
+      "when_to_use": "You have a job description and want to know which existing resume lines already answer it.",
+      "when_not_to_use": "You want prose rewritten, or a model's opinion. This reads phrases, not intent.",
+      "inputs": [
+        "PYANY_VARIANT (required)",
+        "PYANY_JD or PYANY_JD_FILE (required)"
+      ],
+      "outputs": [
+        "variants/<v>/proposals.json"
+      ],
+      "preconditions": [
+        "variant name matches ^[a-z0-9][a-z0-9-]{0,39}$"
+      ],
+      "example": "PYANY_VARIANT=acme PYANY_JD='We need Golang and observability' doit analyze_job"
+    },
+    {
+      "name": "apply_approved",
+      "command": "doit apply_approved",
+      "desc": "Fold approved proposals into the variant resume",
+      "summary": "Writes variants/<v>/resume.json from variants/<v>/approved.json and nothing else. Without approved.json it fails before touching the filesystem, which is the gate that stops an unreviewed edit.",
+      "when_to_use": "After a human has approved proposals and filled in suggested_change.",
+      "when_not_to_use": "Before approval, or to force an edit through. There is no override flag on purpose.",
+      "inputs": [
+        "PYANY_VARIANT (required)"
+      ],
+      "outputs": [
+        "variants/<v>/resume.json",
+        "variants/<v>/applied.json"
+      ],
+      "preconditions": [
+        "variants/<v>/approved.json exists with at least one item"
+      ],
+      "example": "PYANY_VARIANT=acme doit apply_approved"
+    },
+    {
+      "name": "build_pdf",
+      "command": "doit build_pdf",
+      "desc": "Render the variant resume to a validated PDF with pdfcpu",
+      "summary": "resume.json to pdfcpu JSON to create, validate, optimize. Writes variants/<v>/build/resume.pdf and status.json; fails on a validate error rather than serving a broken file.",
+      "when_to_use": "After apply_approved, when you need the PDF to preview or download.",
+      "when_not_to_use": "To check analysis results, or before the resume has any approved content.",
+      "inputs": [
+        "PYANY_VARIANT (required)"
+      ],
+      "outputs": [
+        "variants/<v>/build/resume.pdf",
+        "variants/<v>/build/status.json",
+        "variants/<v>/build/resume.pdfcpu.json"
+      ],
+      "preconditions": [
+        "pdfcpu on PATH or at ~/.local/bin/pdfcpu",
+        "variants/<v>/resume.json exists, or the base resume does"
+      ],
+      "example": "PYANY_VARIANT=acme doit build_pdf"
+    },
+    {
+      "name": "show_tasks",
+      "command": "doit show_tasks",
+      "desc": "Print the five catalogue commands Needle can route",
+      "summary": "Reads the generated tools.json and prints name, scope and a runnable example. This is the task a router calls to discover what exists.",
+      "when_to_use": "You forgot the exact command name, or you are checking that a name is in the catalogue.",
+      "when_not_to_use": "To run a task. It only prints.",
+      "inputs": [],
+      "outputs": [
+        "stdout only"
+      ],
+      "preconditions": [
+        "tools.json exists (doit tools_json)"
+      ],
+      "example": "doit show_tasks"
+    },
+    {
+      "name": "start_dev",
+      "command": "doit start_dev",
+      "desc": "Start the local Flask dev server in the background",
+      "summary": "Spawns main.py serve on PYANY_PORT (default 5001) and writes its pid. Refuses on PythonAnywhere, where a second server would only burn the CPU quota.",
+      "when_to_use": "Working locally and you want the editor reachable on a port.",
+      "when_not_to_use": "On the PythonAnywhere host, or anywhere the site is already served.",
+      "inputs": [
+        "PYANY_PORT (optional, default 5001)"
+      ],
+      "outputs": [
+        ".doit-dev-server.pid"
+      ],
+      "preconditions": [
+        "not running on PythonAnywhere"
+      ],
+      "example": "doit start_dev"
+    }
+  ]
+}

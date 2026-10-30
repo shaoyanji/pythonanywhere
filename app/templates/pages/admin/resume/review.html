@@ -1,0 +1,101 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Resume / {{ variant }}</p>
+    <h1>Review proposals</h1>
+    <p class="lede">
+      Threshold {{ proposals.threshold }}. Tick a proposal, write the change a human is
+      willing to stand behind, then approve. Only an approved change is ever applied.
+    </p>
+    <p class="muted">
+      approved.json: {{ "present" if approved else "absent" }} ·
+      variant resume: {{ "present" if has_resume else "still the base" }}
+    </p>
+  </section>
+
+  <section class="panel stack">
+    <h2>Proposals ({{ proposals.proposals | length }})</h2>
+    {% if proposals.proposals %}
+      <form method="post" action="{{ url_for('resume.approve', variant=variant) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th></th>
+                <th>Score</th>
+                <th>Requirement</th>
+                <th>Resume line</th>
+                <th>Evidence from the JD</th>
+                <th>Approved change</th>
+                <th>Apply to</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for proposal in proposals.proposals %}
+                <tr>
+                  <td><input type="checkbox" name="approve_{{ loop.index0 }}" aria-label="approve"></td>
+                  <td>{{ "%.3f" | format(proposal.score) }}</td>
+                  <td>{{ proposal.requirement }}</td>
+                  <td><code>{{ proposal.resume_key }}</code></td>
+                  <td class="evidence">{{ proposal.evidence }}</td>
+                  <td>
+                    <input name="change_{{ loop.index0 }}" placeholder="wording you accept (optional)">
+                  </td>
+                  <td>
+                    <select name="apply_to_{{ loop.index0 }}">
+                      <option value="skills">skills</option>
+                      <option value="bullets">bullets</option>
+                      <option value="summary">summary</option>
+                      <option value="none">record only</option>
+                    </select>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <button type="submit">Approve selected</button>
+      </form>
+    {% else %}
+      <p class="muted">No proposal cleared the threshold for this job description.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel stack">
+    <h2>Gaps ({{ proposals.gaps | length }})</h2>
+    {% if proposals.gaps %}
+      <ul class="plain-list">
+        {% for gap in proposals.gaps %}
+          <li><strong>{{ gap.requirement }}</strong> — {{ gap.evidence }}</li>
+        {% endfor %}
+      </ul>
+      <p class="muted">A gap is a hole in the resume, not a draft bullet. Fill it by hand if it is true.</p>
+    {% else %}
+      <p class="muted">No gaps: every requirement mapped to an existing line.</p>
+    {% endif %}
+  </section>
+
+  <section class="panel stack">
+    <h2>Apply and build</h2>
+    <div class="row-actions">
+      <form method="post" action="{{ url_for('resume.apply_changes', variant=variant) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit">Apply approved</button>
+      </form>
+      <form method="post" action="{{ url_for('resume.build', variant=variant) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <button type="submit">Build PDF</button>
+      </form>
+      {% if has_resume %}
+        <a href="{{ url_for('resume.download_pdf', variant=variant) }}">Download PDF</a>
+      {% endif %}
+    </div>
+  </section>
+
+  <section class="panel stack">
+    <h2>Job description used</h2>
+    <pre class="jd-text">{{ proposals.jd }}</pre>
+  </section>
+{% endblock %}

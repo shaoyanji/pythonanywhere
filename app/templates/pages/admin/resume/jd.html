@@ -1,0 +1,36 @@
+{% extends "layouts/admin.html" %}
+
+{% block content %}
+  <section class="panel stack">
+    <p class="eyebrow">Resume / {{ variant }}</p>
+    <h1>Job description</h1>
+    <p class="lede">
+      Deterministic analysis: synonym groups, stemming, TF-IDF weighted cosine with a
+      fixed threshold of {{ threshold }}. No model, no rewriting.
+    </p>
+    {% if proposals_count %}
+      <a href="{{ url_for('resume.review', variant=variant) }}">
+        {{ proposals_count }} existing proposal(s) — review them
+      </a>
+    {% endif %}
+  </section>
+
+  <section class="panel stack">
+    <form class="admin-form" method="post" action="{{ url_for('resume.analyze', variant=variant) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Paste the job description
+        <textarea name="jd" rows="14" required>{{ jd_text }}</textarea>
+      </label>
+      <button type="submit">Analyze</button>
+    </form>
+  </section>
+
+  <section class="panel stack">
+    <h2>How to read the result</h2>
+    <ul class="plain-list">
+      <li>A proposal points at one existing resume line and quotes the JD clause it came from.</li>
+      <li>A gap is a requirement the resume does not answer. A gap never becomes a bullet.</li>
+      <li>Nothing is written to the variant resume until a human approves it.</li>
+    </ul>
+  </section>
+{% endblock %}
