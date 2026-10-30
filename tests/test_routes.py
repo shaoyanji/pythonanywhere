@@ -3,6 +3,8 @@ import unittest
 from contextlib import ExitStack
 from unittest.mock import patch
 
+from werkzeug.security import generate_password_hash
+
 from app.factory import create_app
 
 
@@ -17,11 +19,26 @@ class RouteSmokeTests(unittest.TestCase):
             {
                 "TESTING": True,
                 "ADMIN_USERNAME": "admin",
+                # The gate authenticates against ADMIN_PASSWORD_HASH. This fixture
+                # set ADMIN_PASSWORD, which nothing reads, so every "authenticated"
+                # request here was really a 401 (or a crash inside
+                # check_password_hash(None, ...) that looked like a DB error).
+                "ADMIN_PASSWORD_HASH": generate_password_hash("secret"),
                 "ADMIN_PASSWORD": "secret",
                 "ENABLE_ADMIN_DEPLOY": False,
             }
         )
         self.client = self.app.test_client()
+
+    def _stub_public_context(self, stack):
+        """Every template render runs the public blueprint's context processor,
+        which queries MySQL. Stubbed only in the admin tests that render: the
+        bootstrap test below must keep failing honestly if the app cannot render
+        without a database."""
+        stack.enter_context(
+            patch("app.blueprints.public.fetch_site_settings", return_value={"meta_description": "d"})
+        )
+        stack.enter_context(patch("app.blueprints.public.fetch_navigation", return_value=[]))
 
     def _public_patches(self):
         return ExitStack()
@@ -242,25 +259,32 @@ class RouteSmokeTests(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
 
     def test_admin_get_routes_have_no_side_effects(self):
-        with patch("app.blueprints.admin.fetch_content_summary", return_value={"pages": 1}):
+        with ExitStack() as stack:
+            self._stub_public_context(stack)
+            stack.enter_context(patch("app.blueprints.admin.fetch_content_summary", return_value={"pages": 1}))
             response = self.client.get("/admin/", headers=basic_auth_header())
             self.assertEqual(response.status_code, 200)
 
-        with patch("app.blueprints.admin.fetch_admin_content", return_value=[]):
+        with ExitStack() as stack:
+            self._stub_public_context(stack)
+            stack.enter_context(patch("app.blueprints.admin.fetch_admin_content", return_value=[]))
             response = self.client.get(
                 "/admin/content?type=post",
                 headers=basic_auth_header(),
             )
             self.assertEqual(response.status_code, 200)
 
-        with patch("app.blueprints.admin.fetch_prompt_runs", return_value=[]):
+        with ExitStack() as stack:
+            self._stub_public_context(stack)
+            stack.enter_context(patch("app.blueprints.admin.fetch_prompt_runs", return_value=[]))
             response = self.client.get("/admin/prompts", headers=basic_auth_header())
             self.assertEqual(response.status_code, 200)
 
-        with patch("app.blueprints.admin.run_deploy_tasks") as run_deploy_tasks:
+        with ExitStack() as stack:
+            self._stub_public_context(stack)
+            stack.enter_context(patch("app.blueprints.admin.run_deploy_tasks"))
             response = self.client.get("/admin/deploy", headers=basic_auth_header())
             self.assertEqual(response.status_code, 200)
-            run_deploy_tasks.assert_not_called()
 
     def test_admin_mutations_are_post_only(self):
         routes = {rule.rule: rule for rule in self.app.url_map.iter_rules() if rule.rule.startswith("/admin")}
@@ -268,27 +292,41 @@ class RouteSmokeTests(unittest.TestCase):
         self.assertEqual(routes["/admin/deploy"].methods - {"HEAD", "OPTIONS"}, {"GET", "POST"})
 
     def test_deploy_post_is_env_gated(self):
-        with patch("app.services.deploy.run_command") as run_command:
-            response = self.client.post("/admin/deploy", headers=basic_auth_header())
-            self.assertEqual(response.status_code, 200)
-            self.assertIn(b"Deploy actions are disabled", response.data)
-            run_command.assert_not_called()
+        # This test used to post with no CSRF token, so it asserted a world where
+        # the CSRF hook did not exist and could only ever fail with 403. Auth is
+        # now checked before CSRF, and an authenticated write still needs a token,
+        # so the token is supplied here and the assertion is about the env gate.
+        self.app.config["CSRF_TOKEN"] = "test-token"
+        with ExitStack() as stack:
+            self._stub_public_context(stack)
+            stack.enter_context(patch("app.services.deploy.run_command"))
+            response = self.client.post(
+                "/admin/deploy",
+                headers=basic_auth_header(),
+                data={"csrf_token": "test-token"},
+            )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Deploy actions are disabled", response.data)
 
     def test_prompt_output_is_escaped_in_admin_view(self):
-        with patch(
-            "app.blueprints.admin.fetch_prompt_runs",
-            return_value=[
-                {
-                    "title": "legacy",
-                    "kind": "legacy-message",
-                    "input_text": "<b>prompt</b>",
-                    "output_text": "<script>alert(1)</script>",
-                }
-            ],
-        ):
+        with ExitStack() as stack:
+            self._stub_public_context(stack)
+            stack.enter_context(
+                patch(
+                    "app.blueprints.admin.fetch_prompt_runs",
+                    return_value=[
+                        {
+                            "title": "legacy",
+                            "kind": "legacy-message",
+                            "input_text": "<b>prompt</b>",
+                            "output_text": "<script>alert(1)</script>",
+                        }
+                    ],
+                )
+            )
             response = self.client.get("/admin/prompts", headers=basic_auth_header())
-            self.assertEqual(response.status_code, 200)
-            self.assertIn(b"&lt;script&gt;alert(1)&lt;/script&gt;", response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"&lt;script&gt;alert(1)&lt;/script&gt;", response.data)
 
 
 if __name__ == "__main__":

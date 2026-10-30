@@ -48,10 +48,29 @@ def init_app(app):
     @app.before_request
     def csrf_protect():
         from flask import request, abort
-        if request.method == "POST":
-            token = request.form.get("csrf_token")
-            if not token or token != app.config.get("CSRF_TOKEN"):
-                abort(403)
+
+        from app.services.auth import credentials_valid, unauthorized_response
+
+        if request.method != "POST":
+            return None
+
+        # Auth first, then CSRF. The admin blueprints answer an unauthenticated
+        # writer with 401 + the basic-auth challenge; CSRF is only meaningful to
+        # a caller who has already identified itself, and a 403 before the
+        # challenge told the wrong story (and made every unauthenticated POST
+        # look like a token problem).
+        #
+        # The 401 is returned here rather than deferred to @admin_required so the
+        # rule holds for the whole blueprint: a future POST route in admin/resume
+        # that forgets the decorator still cannot be reached without credentials,
+        # and the CSRF check below still covers every authenticated POST.
+        if request.blueprint in {"admin", "resume"} and not credentials_valid():
+            return unauthorized_response()
+
+        token = request.form.get("csrf_token")
+        if not token or token != app.config.get("CSRF_TOKEN"):
+            abort(403)
+        return None
 
     @app.context_processor
     def inject_csrf():

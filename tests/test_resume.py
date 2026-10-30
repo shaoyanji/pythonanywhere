@@ -377,12 +377,19 @@ class ResumeRouteAuthTests(ResumeTestCase):
 
         for path in ("/admin/resume/needle", "/admin/resume/acme/apply", "/admin/resume/acme/build"):
             response = self.client.post(path, data={})
-            # The app-wide CSRF hook in app/extensions.py runs as a before_request
-            # and answers an unauthenticated POST with 403 before auth is checked
-            # (the same behaviour the pre-existing suite trips over). Either way
-            # the write is refused; what matters is that nothing is accepted.
-            self.assertIn(response.status_code, (401, 403), path)
+            # Auth is checked before CSRF, so an unidentified writer gets the 401
+            # challenge rather than a misleading 403 about a missing token.
+            self.assertEqual(response.status_code, 401, path)
+            self.assertIn("WWW-Authenticate", response.headers, path)
             self.assertFalse((self.variants / "acme" / "resume.json").exists())
+
+    def test_authenticated_post_still_needs_a_csrf_token(self):
+        response = self.client.post(
+            "/admin/resume/needle",
+            headers=basic_auth_header(),
+            data={"command": "show_tasks"},
+        )
+        self.assertEqual(response.status_code, 403, "CSRF must still gate authenticated writes")
 
     def test_overview_renders_for_the_owner(self):
         response = self.client.get("/admin/resume/", headers=basic_auth_header())
