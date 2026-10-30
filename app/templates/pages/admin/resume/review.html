@@ -46,8 +46,10 @@
                   <td>
                     <select name="apply_to_{{ loop.index0 }}">
                       <option value="skills">skills</option>
-                      <option value="bullets">bullets</option>
                       <option value="summary">summary</option>
+                      {% for position, heading in experience %}
+                        <option value="bullets:{{ position }}">bullets → {{ heading }}</option>
+                      {% endfor %}
                       <option value="none">record only</option>
                     </select>
                   </td>

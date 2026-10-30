@@ -179,6 +179,44 @@ class ApprovalGateTests(ResumeTestCase):
         variant_skills = {skill["name"] for skill in variant["sections"]["skills"]}
         self.assertTrue(base_skills.issubset(variant_skills))
 
+    def test_bullet_change_lands_on_the_selected_experience(self):
+        name = "acme"
+        self.client.post(
+            f"/admin/resume/{name}/jd",
+            headers=basic_auth_header(),
+            data={"csrf_token": self.csrf(), "jd": SAMPLE_JD},
+        )
+        payload = {
+            "csrf_token": self.app.config["CSRF_TOKEN"],
+            "approve_0": "on",
+            "change_0": "Led the migration to a declarative fleet",
+            "apply_to_0": "bullets:1",  # the SECOND experience entry
+        }
+        self.client.post(f"/admin/resume/{name}/approve", headers=basic_auth_header(), data=payload)
+        self.client.post(
+            f"/admin/resume/{name}/apply",
+            headers=basic_auth_header(),
+            data={"csrf_token": self.app.config["CSRF_TOKEN"]},
+        )
+
+        variant = json.loads((self.variants / name / "resume.json").read_text())
+        second = variant["sections"]["experience"][1]["bullets"]
+        first = variant["sections"]["experience"][0]["bullets"]
+        self.assertIn("Led the migration to a declarative fleet", second)
+        self.assertNotIn("Led the migration to a declarative fleet", first)
+
+    def test_review_page_offers_each_experience_as_a_bullet_target(self):
+        name = "acme"
+        self.client.post(
+            f"/admin/resume/{name}/jd",
+            headers=basic_auth_header(),
+            data={"csrf_token": self.csrf(), "jd": SAMPLE_JD},
+        )
+        response = self.client.get(f"/admin/resume/{name}/review", headers=basic_auth_header())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'value="bullets:0"', response.data)
+        self.assertIn(b'value="bullets:1"', response.data)
+
     def test_invalid_variant_name_is_rejected(self):
         for name in ("..", "a/b", "UPPER", ""):
             with self.app.app_context():

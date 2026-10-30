@@ -144,12 +144,19 @@ def review(variant: str):
     if not proposals:
         flash("no analysis yet: paste a job description first", "error")
         return redirect(url_for("resume.jd", variant=variant))
+    resume = store.load_variant(variant) or store.load_base()
+    experience = [
+        (index, " — ".join(part for part in (job.get("role"), job.get("company")) if part)
+         or f"experience {index}")
+        for index, job in enumerate((resume.get("sections") or {}).get("experience", []) or [])
+    ]
     return render_template(
         "pages/admin/resume/review.html",
         variant=variant,
         proposals=proposals,
         approved=store.load_approved(variant),
         has_resume=store.load_variant(variant) is not None,
+        experience=experience,
     )
 
 
@@ -162,6 +169,11 @@ def approve(variant: str):
     for index, proposal in enumerate(proposals.get("proposals", [])):
         if request.form.get(f"approve_{index}") != "on":
             continue
+        # The control is one select: "skills", "summary", "none" or
+        # "bullets:<experience index>". The index travels with the choice so a
+        # bullet edit cannot land on the wrong job, which is what a hardcoded 0 did.
+        target = request.form.get(f"apply_to_{index}") or "skills"
+        apply_to, _, target_index = target.partition(":")
         items.append(
             {
                 "resume_key": proposal["resume_key"],
@@ -170,8 +182,8 @@ def approve(variant: str):
                 "evidence": proposal["evidence"],
                 "score": proposal["score"],
                 "suggested_change": (request.form.get(f"change_{index}") or "").strip() or None,
-                "apply_to": request.form.get(f"apply_to_{index}") or "skills",
-                "target_index": 0,
+                "apply_to": apply_to or "skills",
+                "target_index": int(target_index) if target_index.isdigit() else 0,
             }
         )
     if not items:
