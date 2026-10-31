@@ -2,9 +2,13 @@ import base64
 import hashlib
 import json
 import os
+import re
 import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
+import zlib
 from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
@@ -39,6 +43,31 @@ def digest_of(path):
 
 def pdfcpu_available():
     return bool(shutil.which("pdfcpu")) or (Path.home() / ".local/bin/pdfcpu").is_file()
+
+
+def pdf_text_positions(path):
+    """Read back where pdfcpu actually drew each text element.
+
+    Asserting on the JSON we hand to pdfcpu is not enough: the deployed build
+    validated a PDF whose text was all on one baseline because pdfcpu ignored
+    the key we used. pdfcpu writes each text box as a ``cm`` matrix
+    (``1 0 0 1 X Y cm``) followed by ``(text) Tj``, and the stream may be Flate
+    compressed, so this inflates every stream and returns ``(x, y, text)`` in
+    drawing order.
+    """
+    data = Path(path).read_bytes()
+    positions = []
+    for match in re.finditer(rb"stream\r?\n(.*?)\r?\nendstream", data, re.S):
+        raw = match.group(1)
+        try:
+            content = zlib.decompress(raw)
+        except zlib.error:
+            content = raw
+        for x, y, text in re.findall(
+            rb"1\.0+ 0\.0+ 0\.0+ 1\.0+ ([\d.]+) ([\d.]+) cm.*?\((.*?)\) Tj", content, re.S
+        ):
+            positions.append((float(x), float(y), text.decode("latin-1")))
+    return positions
 
 
 class ResumeTestCase(unittest.TestCase):
@@ -252,6 +281,29 @@ class PdfTests(ResumeTestCase):
         for size in sizes:
             self.assertIsInstance(size, int, f"font.size {size!r} must be an int for pdfcpu")
 
+    def test_content_json_uses_pdfcpu_position_key(self):
+        """pdfcpu's TextBox field is ``pos``, not ``position``.
+
+        A ``position`` key is unknown to ``encoding/json``, so it is dropped and
+        every text element defaults to (0,0). That is the collapsed bottom strip
+        the tester saw: the page was valid, and unreadable. Asserting the key
+        here catches a rename before a build needs the binary.
+        """
+        base = json.loads(BASE_RESUME.read_text())
+        with self.app.app_context():
+            content = pdf.build_content(base)
+        elements = [
+            element
+            for page in content["pages"].values()
+            for element in page["content"]["text"]
+        ]
+        self.assertTrue(elements, "the resume should produce text elements")
+        for element in elements:
+            self.assertNotIn("position", element, "pdfcpu reads the `pos` key")
+            self.assertEqual(len(element["pos"]), 2, element)
+            for coordinate in element["pos"]:
+                self.assertGreaterEqual(coordinate, 0.0, element)
+
     @unittest.skipUnless(pdfcpu_available(), "pdfcpu not installed")
     def test_build_produces_a_validated_pdf_and_leaves_the_base_alone(self):
         base_digest = digest_of(BASE_RESUME)
@@ -314,10 +366,85 @@ class PdfTests(ResumeTestCase):
             content = pdf.build_content(base)
         self.assertGreater(len(content["pages"]), 1)
         for page in content["pages"].values():
-            positions = [entry["position"][1] for entry in page["content"]["text"]]
+            positions = [entry["pos"][1] for entry in page["content"]["text"]]
             self.assertGreater(min(positions), 40.0, "a line fell below the bottom margin")
             self.assertLessEqual(max(positions), 800.0, "a line rose above the top margin")
             self.assertEqual(positions, sorted(positions, reverse=True), "lines must run down the page")
+
+    @unittest.skipUnless(pdfcpu_available(), "pdfcpu not installed")
+    def test_sample_pdf_draws_each_line_at_its_own_position(self):
+        """Read the positions back out of the PDF, not out of our own JSON.
+
+        The deployed build validated while drawing the whole resume on one
+        baseline at the page edge, so "a PDF exists" is not the check. This
+        asserts the name is at the top, every element is inside the page, and
+        the baselines are distinct and advance down the page.
+        """
+        name = self.approved_variant()
+        self.client.post(
+            f"/admin/resume/{name}/apply",
+            headers=basic_auth_header(),
+            data={"csrf_token": self.csrf()},
+        )
+        response = self.client.post(
+            f"/admin/resume/{name}/build",
+            headers=basic_auth_header(),
+            data={"csrf_token": self.csrf()},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        with self.app.app_context():
+            path = store.pdf_path(name)
+        positions = pdf_text_positions(path)
+        self.assertGreater(len(positions), 20, "expected the whole resume to be drawn")
+
+        base = json.loads(BASE_RESUME.read_text())
+        first_x, first_y, first_text = positions[0]
+        self.assertIn(base["name"].split()[0], first_text, "page 1 starts with the name")
+        self.assertGreater(first_y, 700.0, f"the name belongs at the top, not y={first_y}")
+        self.assertEqual(first_y, max(y for _, y, _ in positions))
+
+        for x, y, text in positions:
+            self.assertGreaterEqual(x, 0.0, text)
+            self.assertLessEqual(x, pdf.PAGE_WIDTH, text)
+            self.assertGreater(y, 0.0, text)
+            self.assertLessEqual(y, pdf.PAGE_HEIGHT, text)
+
+        ys = [y for _, y, _ in positions]
+        self.assertGreater(len(set(ys)), 10, "all text collapsed onto one baseline")
+        self.assertEqual(ys, sorted(ys, reverse=True), "baselines must advance down the page")
+        self.assertGreater(max(ys) - min(ys), 400.0, "the layout should cover the page")
+
+
+class DoitTaskTests(ResumeTestCase):
+    @unittest.skipUnless(pdfcpu_available(), "pdfcpu not installed")
+    def test_doit_build_pdf_succeeds_and_produces_a_validated_pdf(self):
+        """The task the Needle route calls, run the way it calls it."""
+        variant = self.variants / "doit-sample"
+        variant.mkdir()
+        shutil.copy(BASE_RESUME, variant / "resume.json")
+
+        environment = {
+            **os.environ,
+            "PYANY_VARIANT": "doit-sample",
+            "PYANY_VARIANTS_DIR": str(self.variants),
+        }
+        completed = subprocess.run(
+            [sys.executable, "-m", "doit", "build_pdf"],
+            cwd=str(tooling.ROOT),
+            env=environment,
+            capture_output=True,
+            text=True,
+            timeout=180,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+
+        path = variant / "build" / "resume.pdf"
+        self.assertTrue(path.is_file(), completed.stdout)
+        self.assertEqual(path.read_bytes()[:4], b"%PDF")
+        status = json.loads((variant / "build" / "status.json").read_text())
+        self.assertEqual(status["validate"], "ok")
+        self.assertGreater(status["pages"], 0)
 
 
 class CatalogueTests(ResumeTestCase):
@@ -378,6 +505,42 @@ class NeedleTests(ResumeTestCase):
         result = needle.run("show_tasks", timeout=60)
         self.assertIn("analyze_job", result["output"])
         self.assertEqual(result["known"], needle.known_names())
+
+    def test_needle_never_uses_the_web_server_as_python(self):
+        """A PythonAnywhere worker's ``sys.executable`` is uWSGI.
+
+        Spawning ``[sys.executable, "-m", "doit", ...]`` there runs
+        ``uwsgi -m doit``, and uWSGI parses ``doit`` as a config file and exits
+        with ``unable to load configuration from doit`` — the live failure. The
+        child must be a Python, and still run the same doit command.
+        """
+        completed = type("Completed", (), {"returncode": 0, "stdout": "ok", "stderr": ""})()
+        with patch.object(needle.sys, "executable", "/usr/local/bin/uwsgi"), patch.object(
+            needle.subprocess, "run", return_value=completed
+        ) as run:
+            result = needle.run("show_tasks")
+
+        argv = run.call_args.args[0]
+        self.assertNotEqual(Path(argv[0]).name, "uwsgi")
+        self.assertTrue(Path(argv[0]).name.startswith("python"), argv[0])
+        self.assertEqual(argv[1:3], ["-m", "doit"])
+        self.assertEqual(argv[3], "show_tasks")
+        self.assertTrue(result["executed"])
+
+    def test_python_override_is_honoured(self):
+        with patch.dict(os.environ, {"PYANY_PYTHON": "/opt/site/bin/python3.10"}):
+            self.assertEqual(needle.interpreter(), "/opt/site/bin/python3.10")
+
+    def test_missing_interpreter_is_reported_without_spawning(self):
+        with patch.object(needle.sys, "executable", "/usr/local/bin/uwsgi"), patch.object(
+            needle.sys, "exec_prefix", "/nonexistent"
+        ), patch.object(needle.shutil, "which", return_value=None), patch.object(
+            needle.subprocess, "run"
+        ) as run:
+            result = needle.run("show_tasks")
+        self.assertFalse(result["executed"])
+        self.assertIn("PYANY_PYTHON", result["error"])
+        run.assert_not_called()
 
 
 class ResumeRouteAuthTests(ResumeTestCase):

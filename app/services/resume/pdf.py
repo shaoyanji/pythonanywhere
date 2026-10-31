@@ -176,9 +176,14 @@ class _Canvas:
             self._break()
 
     def text(self, value: str, x: float, size: float, y: float | None = None, bold: bool = False) -> None:
+        # pdfcpu's TextBox declares ``Position`` with the JSON tag ``pos``; a
+        # ``position`` key is an unknown field, so encoding/json drops it and
+        # every element falls back to (0,0) — which is why the deployed build
+        # stacked the whole resume on one line at the page edge instead of
+        # failing loudly. Keep the tag, not the struct field name.
         line = {
             "value": value,
-            "position": [round(x, 2), round(self.y if y is None else y, 2)],
+            "pos": [round(x, 2), round(self.y if y is None else y, 2)],
             "font": {"name": "Helvetica-Bold" if bold else "Helvetica", "size": _pt(size)},
         }
         self.page.append(line)

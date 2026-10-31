@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import os
 import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -30,6 +31,30 @@ DEFAULT_TIMEOUT = 180
 
 class NeedleError(Exception):
     pass
+
+
+def interpreter() -> str:
+    """The Python that runs ``doit``, never the server that is hosting us.
+
+    Inside a PythonAnywhere web worker ``sys.executable`` is the uWSGI binary,
+    so spawning ``[sys.executable, "-m", "doit", ...]`` runs ``uwsgi -m doit``
+    — and uWSGI parses ``doit`` as a config file and exits with
+    ``unable to load configuration from doit``. That is the live failure the
+    tester saw; the task never started. Set ``PYANY_PYTHON`` to override, or
+    this falls back to a real interpreter.
+    """
+    override = os.environ.get("PYANY_PYTHON")
+    if override:
+        return override
+
+    candidates = [sys.executable, sys.exec_prefix + "/bin/python3", shutil.which("python3"), shutil.which("python")]
+    for candidate in candidates:
+        if candidate and os.path.isfile(candidate) and Path(candidate).name.lower().startswith("python"):
+            return candidate
+    raise NeedleError(
+        "no Python interpreter found to run doit: set PYANY_PYTHON to one "
+        f"(sys.executable is {sys.executable!r})"
+    )
 
 
 def catalogue() -> list[dict]:
@@ -76,10 +101,15 @@ def run(command: str, timeout: int = DEFAULT_TIMEOUT) -> dict:
             "known": names,
         }
 
+    try:
+        python = interpreter()
+    except NeedleError as error:
+        return {"ok": False, "executed": False, "name": name, "output": "", "error": str(error), "known": names}
+
     environment = os.environ.copy()
     environment.update(params)
 
-    argv = [sys.executable, "-m", "doit", name]
+    argv = [python, "-m", "doit", name]
     try:
         completed = subprocess.run(
             argv,
